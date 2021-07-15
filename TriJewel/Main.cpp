@@ -1,4 +1,6 @@
 ﻿# include <Siv3D.hpp>
+# include "puzzle.h"
+# include "story.h"
 
 using App = SceneManager<String>;
 
@@ -120,6 +122,7 @@ public:
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % 6), 200 + 50 * (i / 6))))
                 {
                     stage = i + 1;
+                    puzzle_init(difficult, stage);
                     changeScene(U"Puzzle");
                 }
             }
@@ -180,6 +183,11 @@ public:
     // 更新関数
     void update() override
     {
+        // クリアしたらステージセレクトへ戻る
+        if (puzzle_update() == 1) {
+            changeScene(U"Select");
+        }
+
         // ステージセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
@@ -191,6 +199,8 @@ public:
     void draw() const override
     {
         Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        
+        puzzle_draw();
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
@@ -257,6 +267,7 @@ public:
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5))))
                 {
                     story = i + 1;
+                    story_init(chapter,story);
                     changeScene(U"Story");
                 }
             }
@@ -317,6 +328,10 @@ public:
     // 更新関数
     void update() override
     {
+        if (story_update() == 1) {
+            changeScene(U"StorySelect");
+        }
+
         // ストーリーセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
@@ -328,6 +343,8 @@ public:
     void draw() const override
     {
         Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+
+        story_draw();
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
