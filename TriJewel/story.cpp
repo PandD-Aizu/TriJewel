@@ -39,9 +39,10 @@ int story_update() {
 void story_draw() {
 	const int length = (int)((Scene::Time() * 1000 - start) / 50);
 	const int namebox_size = 65;
+	const int chara_size = 128;
 
-	Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - 128 - namebox_size - 10, 128, 128).draw(Palette::Yellow);
-	Rect(Scene::Width() / 16 * 15 - 128, (Scene::Height() / 16) * 12 - 128 - namebox_size - 10, 128, 128).draw(Palette::Yellow);
+	Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10, chara_size, chara_size).draw(Palette::Yellow);
+	Rect(Scene::Width() / 16 * 15 - chara_size, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10, chara_size, chara_size).draw(Palette::Yellow);
 
 	if (dialogue[scene].speaker != 0) {
 		Rect namebox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - namebox_size, 150, namebox_size).draw(Palette::White).drawFrame(1, 0, Palette::Black);
