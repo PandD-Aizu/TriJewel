@@ -38,7 +38,16 @@ int story_update() {
 // ストーリーの描画関数
 void story_draw() {
 	const int length = (int)((Scene::Time() * 1000 - start) / 50);
+	const int namebox_size = 65;
 
-	Rect textbox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12, (Scene::Width() / 16) * 14, (Scene::Height() / 16) * 3).draw(Palette::White);
+	Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - 128 - namebox_size - 10, 128, 128).draw(Palette::Yellow);
+	Rect(Scene::Width() / 16 * 15 - 128, (Scene::Height() / 16) * 12 - 128 - namebox_size - 10, 128, 128).draw(Palette::Yellow);
+
+	if (dialogue[scene].speaker != 0) {
+		Rect namebox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - namebox_size, 150, namebox_size).draw(Palette::White).drawFrame(1, 0, Palette::Black);
+		FontAsset(U"StoryFont")(U"キャラ{}"_fmt(dialogue[scene].speaker)).draw(namebox.stretched(-10), Palette::Black);
+	}
+
+	Rect textbox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12, (Scene::Width() / 16) * 14, (Scene::Height() / 16) * 3).draw(Palette::White).drawFrame(1, 0, Palette::Black);
 	FontAsset(U"StoryFont")(dialogue[scene].text.substr(0, length)).draw(textbox.stretched(-10), Palette::Black);
 }
