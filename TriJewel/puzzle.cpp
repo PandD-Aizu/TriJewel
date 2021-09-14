@@ -17,8 +17,8 @@ void puzzle_init(int diff, int stage) {
 	};
 
 	// プレイヤー初期座標
-	player.i = 230;
-	player.j = 350;
+	player.i = 4;
+	player.j = 0;
 }
 
 // パズルの更新関数
@@ -30,6 +30,7 @@ int puzzle_update() {
 	if (KeyRight.down()) player.i += 30;
 	if (KeyLeft.down()) player.i -= 30;
 	/*** ここを編集してください ***/
+
 	return 0;
 }
 
@@ -94,4 +95,12 @@ void puzzle_draw() {
 	//主人公
 	Rect(player.i, player.j, 30, 30).draw(Palette::Blue);
 	/*** ここを編集してください ***/
+}
+
+bool objmove() {
+
+}
+
+bool playermove() {
+
 }
