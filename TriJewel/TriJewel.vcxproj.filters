@@ -382,10 +382,10 @@
     </Xml>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="puzzle.h">
+    <ClInclude Include="story.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="story.h">
+    <ClInclude Include="puzzle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
