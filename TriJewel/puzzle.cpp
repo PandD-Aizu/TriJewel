@@ -101,3 +101,11 @@ void puzzle_draw() {
 	Rect(player.i, player.j, 30, 30).draw(Palette::Blue);
 	/*** ‚±‚±‚ğ•ÒW‚µ‚Ä‚­‚¾‚³‚¢ ***/
 }
+
+bool objmove() {
+	return true;
+}
+
+bool playermove() {
+	return true;
+}
