@@ -30,43 +30,23 @@ int puzzle_update() {
 
 	//プレイヤー移動
 	if (KeyLeft.down()) {
-		if (player.i - 1 == (0 || 3 || 5)) {
+		if (playerstack('x',-1)) {
 			player.i--;
-		}
-		else if (player.i - 1 == (2 || 4)) {
-			if (player.i - 2 == (0 || 3 || 5)) {
-				player.i--;
-			}
 		}
 	}
 	if (KeyRight.down()) {
-		if (player.i + 1 == (0 || 3 || 5)) {
+		if (playerstack('x', 1)) {
 			player.i++;
-		}
-		else if (player.i + 1 == (2 || 4)) {
-			if (player.i + 2 == (0 || 3 || 5)) {
-				player.i++;
-			}
 		}
 	}
 	if (KeyUp.down()) {
-		if (player.j - 1 == (0 || 3 || 5)) {
+		if (playerstack('y', -1)) {
 			player.j--;
-		}
-		else if (player.j - 1 == (2 || 4)) {
-			if (player.j - 2 == (0 || 3 || 5)) {
-				player.j--;
-			}
 		}
 	}
 	if (KeyDown.down()) {
-		if (player.j + 1 == (0 || 3 || 5)) {
+		if (playerstack('y', 1)) {
 			player.j++;
-		}
-		else if (player.j + 1 == (2 || 4)) {
-			if (player.j + 2 == (0 || 3 || 5)) {
-				player.j++;
-			}
 		}
 	}
 
@@ -78,10 +58,63 @@ void puzzle_draw() {
 	/*** ここを編集してください ***/
 }
 
-bool objmove() {
+bool objstack(char t, int n) {
+	int data;
 
+	if (strcmp(&t, "x")) {
+		if (n > 0) {
+			data = stage_data[player.i + 2][player.j];
+		}
+		else {
+			data = stage_data[player.i - 2][player.j];
+		}
+	}
+	if (strcmp(&t, "y")) {
+		if (n > 0) {
+			data = stage_data[player.i][player.j + 2];
+		}
+		else {
+			data = stage_data[player.i][player.j - 2];
+		}
+	}
+
+	if (data == (0 || 3 || 5)) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
-bool playermove() {
+bool playerstack(char t, int n) {
+	int data;
 
+	if (strcmp(&t, "x")) {
+		if (n > 0) {
+			data = stage_data[player.i + 1][player.j];
+		}
+		else {
+			data = stage_data[player.i - 1][player.j];
+		}
+	}
+	if (strcmp(&t, "y")) {
+		if (n > 0) {
+			data = stage_data[player.i][player.j + 1];
+		}
+		else {
+			data = stage_data[player.i][player.j - 1];
+		}
+	}
+	else
+		return false;
+
+	if (data == (0 || 3 || 5)) {
+		return true;
+	}
+	else if (data == (2 || 4)) {
+		return objstack(t, n);
+	}
+	else {
+		return false;
+	}
 }
