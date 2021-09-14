@@ -390,6 +390,7 @@ void Main()
     Window::SetTitle(U"TriJewel(仮)");
 
 	FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
+    FontAsset::Register(U"StoryFont", 30);
 
 	// シーンマネージャーを作成
 	App manager;

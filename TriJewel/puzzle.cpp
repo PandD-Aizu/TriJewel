@@ -98,9 +98,9 @@ void puzzle_draw() {
 }
 
 bool objmove() {
-
+	return true;
 }
 
 bool playermove() {
-
+	return true;
 }
