@@ -73,6 +73,10 @@ int puzzle_update() {
 		}
 	}
 
+	if (stage_data[player.i][player.j] == 3) {
+		return 1;
+	}
+
 	return 0;
 }
 
