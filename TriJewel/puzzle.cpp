@@ -10,13 +10,13 @@ void puzzle_init(int diff, int stage) {
 	// ステージ読み込み
 
 	stage_data = {
-		{4,4,4,4,4,4,4},
-		{4,1,1,0,0,3,4},
-		{4,1,1,0,0,0,4},
-		{4,0,0,2,0,0,4},
-		{4,0,0,0,1,1,4},
-		{4,0,0,0,1,1,4},
-		{4,4,4,4,4,4,4}
+		{1,1,1,1,1,1,1},
+		{1,1,1,0,0,3,1},
+		{1,1,1,0,0,0,1},
+		{1,0,0,2,0,0,1},
+		{1,0,0,0,1,1,1},
+		{1,0,0,0,1,1,1},
+		{1,1,1,1,1,1,1}
 	};
 
 	// プレイヤー初期座標
@@ -25,6 +25,8 @@ void puzzle_init(int diff, int stage) {
 
 	player.x = 130;
 	player.y = 250;
+	player.width = 30;
+	player.height = 30;
 
 	if (player.x < 100) player.x = 100;
 	if (player.x > 250) player.x = 250;
@@ -43,72 +45,34 @@ void puzzle_init(int diff, int stage) {
 // 戻り値: パズルを続行中の場合は 0
 // 　　　  クリアした場合は 1 を返す
 int puzzle_update() {
-
-	if (KeyUp.down()) {
-		switch (stage_data[player.i - 1][player.j]) {
-		case 0:
-			player.y -= 30, player.i--;
-			break;
-		case 2:
-			if (stage_data[player.i - 2][player.j] == 0) {
-				stage_data[player.i - 1][player.j] = 0, stage_data[player.i - 2][player.j] = 2, player.y -= 30, player.i--;
-			}
-			break;
-		case 3:
-			player.y -= 30, player.i--;
-			return 1;
-			break;
-		}
-	}
-	else if (KeyDown.down()) {
-		switch (stage_data[player.i + 1][player.j]) {
-		case 0:
-			player.y += 30, player.i++;
-			break;
-		case 2:
-			if (stage_data[player.i + 2][player.j] == 0) {
-				stage_data[player.i + 1][player.j] = 0, stage_data[player.i + 2][player.j] = 2, player.y += 30, player.i++;
-			}
-			break;
-		case 3:
-			player.y += 30, player.i++;
-			return 1;
-			break;
-		}
-	}
-	else if (KeyRight.down()) {
-		switch (stage_data[player.i][player.j + 1]) {
-		case 0:
-			player.x += 30, player.j++;
-			break;
-		case 2:
-			if (stage_data[player.i][player.j + 2] == 0) {
-				stage_data[player.i][player.j + 1] = 0, stage_data[player.i][player.j + 2] = 2, player.x += 30, player.j++;
-			}
-			break;
-		case 3:
-			player.x += 30, player.j++;
-			return 1;
-			break;
-		}
-	}
-	else if (KeyLeft.down()) {
-		switch (stage_data[player.i][player.j - 1]) {
-		case 0:
-			player.x -= 30, player.j--;
-			break;
-		case 2:
-			if (stage_data[player.i][player.j - 2] == 0) {
-				stage_data[player.i][player.j - 1] = 0, stage_data[player.i][player.j - 2] = 2, player.x -= 30, player.j--;
-			}
-			break;
-		case 3:
-			player.x -= 30, player.j--;
-			return 1;
-			break;
-		}
-	}
 	/*** ここを編集してください ***/
+
+	//プレイヤー移動
+	if (KeyLeft.down()) {
+		if (playerstack('x',-1)) {
+			player.x -= player.width;
+			player.j--;
+		}
+	}
+	if (KeyRight.down()) {
+		if (playerstack('x', 1)) {
+			player.x += player.width;
+			player.j++;
+		}
+	}
+	if (KeyUp.down()) {
+		if (playerstack('y', -1)) {
+			player.y -= player.height;
+			player.i--;
+		}
+	}
+	if (KeyDown.down()) {
+		if (playerstack('y', 1)) {
+			player.y += player.height;
+			player.i++;
+		}
+	}
+
 	return 0;
 }
 
@@ -152,10 +116,63 @@ void puzzle_draw() {
 	Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
 }
 
-bool objmove() {
-	return true;
+bool objstack(char t, int n) {
+	int data = -1;
+
+	if (t == 'x') {
+		if (n > 0) {
+			data = stage_data[player.i][player.j + 2];
+		}
+		else {
+			data = stage_data[player.i][player.j - 2];
+		}
+	}
+	else if (t == 'y') {
+		if (n > 0) {
+			data = stage_data[player.i + 2][player.j];
+		}
+		else {
+			data = stage_data[player.i - 2][player.j];
+		}
+	}
+
+	if (data == 0 || data == 3 || data == 5) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
-bool playermove() {
-	return true;
+bool playerstack(char t, int n) {
+	int data = -1;
+
+	if (t == 'x') {
+		if (n > 0) {
+			data = stage_data[player.i][player.j + 1];
+		}
+		else {
+			data = stage_data[player.i][player.j - 1];
+		}
+	}
+	else if (t == 'y') {
+		if (n > 0) {
+			data = stage_data[player.i + 1][player.j];
+		}
+		else {
+			data = stage_data[player.i - 1][player.j];
+		}
+	}
+	else
+		return false;
+
+	if (data == 0 || data == 3 || data == 5) {
+		return true;
+	}
+	else if (data == 2 || data == 4) {
+		return objstack(t, n);
+	}
+	else {
+		return false;
+	}
 }

@@ -24,7 +24,6 @@ void puzzle_init(int, int);		// パズルの初期化
 int puzzle_update();	// パズルの更新関数
 void puzzle_draw();		// パズルの描画関数
 
-bool objmove();	 //	岩、箱が動くかの判定
-bool playermove();	//プレイヤーの動く判定
-
+bool objstack(char, int);	 //	岩、箱が動くかの判定
+bool playerstack(char, int);		//プレイヤーが動けるかの判定
 #endif
