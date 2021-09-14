@@ -43,72 +43,30 @@ void puzzle_init(int diff, int stage) {
 // 戻り値: パズルを続行中の場合は 0
 // 　　　  クリアした場合は 1 を返す
 int puzzle_update() {
-
-	if (KeyUp.down()) {
-		switch (stage_data[player.i - 1][player.j]) {
-		case 0:
-			player.y -= 30, player.i--;
-			break;
-		case 2:
-			if (stage_data[player.i - 2][player.j] == 0) {
-				stage_data[player.i - 1][player.j] = 0, stage_data[player.i - 2][player.j] = 2, player.y -= 30, player.i--;
-			}
-			break;
-		case 3:
-			player.y -= 30, player.i--;
-			return 1;
-			break;
-		}
-	}
-	else if (KeyDown.down()) {
-		switch (stage_data[player.i + 1][player.j]) {
-		case 0:
-			player.y += 30, player.i++;
-			break;
-		case 2:
-			if (stage_data[player.i + 2][player.j] == 0) {
-				stage_data[player.i + 1][player.j] = 0, stage_data[player.i + 2][player.j] = 2, player.y += 30, player.i++;
-			}
-			break;
-		case 3:
-			player.y += 30, player.i++;
-			return 1;
-			break;
-		}
-	}
-	else if (KeyRight.down()) {
-		switch (stage_data[player.i][player.j + 1]) {
-		case 0:
-			player.x += 30, player.j++;
-			break;
-		case 2:
-			if (stage_data[player.i][player.j + 2] == 0) {
-				stage_data[player.i][player.j + 1] = 0, stage_data[player.i][player.j + 2] = 2, player.x += 30, player.j++;
-			}
-			break;
-		case 3:
-			player.x += 30, player.j++;
-			return 1;
-			break;
-		}
-	}
-	else if (KeyLeft.down()) {
-		switch (stage_data[player.i][player.j - 1]) {
-		case 0:
-			player.x -= 30, player.j--;
-			break;
-		case 2:
-			if (stage_data[player.i][player.j - 2] == 0) {
-				stage_data[player.i][player.j - 1] = 0, stage_data[player.i][player.j - 2] = 2, player.x -= 30, player.j--;
-			}
-			break;
-		case 3:
-			player.x -= 30, player.j--;
-			return 1;
-			break;
-		}
-	}
 	/*** ここを編集してください ***/
+
+	//プレイヤー移動
+	if (KeyLeft.down()) {
+		if (playerstack('x',-1)) {
+			player.i--;
+		}
+	}
+	if (KeyRight.down()) {
+		if (playerstack('x', 1)) {
+			player.i++;
+		}
+	}
+	if (KeyUp.down()) {
+		if (playerstack('y', -1)) {
+			player.j--;
+		}
+	}
+	if (KeyDown.down()) {
+		if (playerstack('y', 1)) {
+			player.j++;
+		}
+	}
+
 	return 0;
 }
 
@@ -158,4 +116,66 @@ bool objmove() {
 
 bool playermove() {
 	return true;
+}
+}
+
+bool objstack(char t, int n) {
+	int data;
+
+	if (strcmp(&t, "x")) {
+		if (n > 0) {
+			data = stage_data[player.i + 2][player.j];
+		}
+		else {
+			data = stage_data[player.i - 2][player.j];
+		}
+	}
+	if (strcmp(&t, "y")) {
+		if (n > 0) {
+			data = stage_data[player.i][player.j + 2];
+		}
+		else {
+			data = stage_data[player.i][player.j - 2];
+		}
+	}
+
+	if (data == (0 || 3 || 5)) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool playerstack(char t, int n) {
+	int data;
+
+	if (strcmp(&t, "x")) {
+		if (n > 0) {
+			data = stage_data[player.i + 1][player.j];
+		}
+		else {
+			data = stage_data[player.i - 1][player.j];
+		}
+	}
+	if (strcmp(&t, "y")) {
+		if (n > 0) {
+			data = stage_data[player.i][player.j + 1];
+		}
+		else {
+			data = stage_data[player.i][player.j - 1];
+		}
+	}
+	else
+		return false;
+
+	if (data == (0 || 3 || 5)) {
+		return true;
+	}
+	else if (data == (2 || 4)) {
+		return objstack(t, n);
+	}
+	else {
+		return false;
+	}
 }
