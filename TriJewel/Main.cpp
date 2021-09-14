@@ -389,8 +389,22 @@ void Main()
 {
     Window::SetTitle(U"TriJewel(仮)");
 
-	FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
+	// フォント
+    FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
     FontAsset::Register(U"StoryFont", 30);
+
+    // 画像
+    TextureAsset::Register(U"player", U"Data/Image/game/player.png");
+    TextureAsset::Register(U"load", U"Data/Image/game/grass.png");
+    TextureAsset::Register(U"wall", U"Data/Image/game/tree.png");
+    TextureAsset::Register(U"rock", U"Data/Image/game/rock.png");
+    TextureAsset::Register(U"goal", U"Data/Image/game/goal.png");
+    TextureAsset::Register(U"シロナ", U"Data/Image/story/sirona.png");
+    TextureAsset::Register(U"リンドル", U"Data/Image/story/rindol.png");
+    TextureAsset::Register(U"チャマ", U"Data/Image/story/chama.png");
+    TextureAsset::Register(U"ファイ", U"Data/Image/story/phi.png");
+    TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
+    TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
 
 	// シーンマネージャーを作成
 	App manager;
