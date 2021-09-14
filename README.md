@@ -27,7 +27,7 @@ git pull origin main
       - できればアルファベットでお願いします
 ```
 git init
-git clone https://github.com/PandD-Aizu/Minge2020_BGW
+git clone https://github.com/PandD-Aizu/TriJewel
 git branch [自分のハンドルネーム]
 git checkout [自分のハンドルネーム]
 git pull origin main
