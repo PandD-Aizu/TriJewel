@@ -1,10 +1,14 @@
 #include"puzzle.h"
 
 static Grid<int> stage_data;	// ステージ情報
+static Array<Grid<int>> stage_data_log;	// ステージ情報のログ
 static Grid<int> stage_data_init;	// ステージ情報(初期状態)
+static Grid<int> base_data;		//岩や箱を除いたステージ情報
 
 static Player player;	// プレイヤー
 static Array<Player> player_log;	// プレイヤーの移動ログ
+
+int BoxNum = 0;		//配置場所（箱）の数をカウントする変数
 
 // パズルデータ用ファイル読み込み
 void readfile(String file) {
@@ -49,13 +53,16 @@ void puzzle_init(int diff, int stage) {
 
 
 	// ステージ読み込み
-	readfile(U"./Data/Stage/test.txt");
+	readfile(U"./Data/Stage/{}/{:0>2}.txt"_fmt(diff, stage));
 	stage_data_init = Grid<int>(stage_data.width(), stage_data.height());
 	for (int i = 0; i < stage_data.height(); i++) {
 		for (int j = 0; j < stage_data.width(); j++) {
 			stage_data_init[i][j] = stage_data[i][j];
 		}
 	}
+
+	base_data = Grid<int>(stage_data.width(), stage_data.height(), -1);
+	baseinit();
 
 	/*
 	stage_data = {
@@ -80,17 +87,21 @@ void puzzle_init(int diff, int stage) {
 	player.height = 30;
 
 	if (player.x < 100) player.x = 100;
-	if (player.x > 250) player.x = 250;
+	if (player.x > 100 + player.width * stage_data.width()) player.x = 100 + player.width * stage_data.width();
 	if (player.y < 100) player.y = 100;
-	if (player.y > 250) player.y = 250;
+	if (player.y > 100 + player.height * stage_data.height()) player.y = 100 + player.height * stage_data.height();
 
 	if (player.i < 0) player.i = 0;
-	if (player.i > stage_data.height()) player.i = stage_data.height();
+	if (player.i > stage_data.height()) player.i = stage_data.height() - 1;
 	if (player.j < 0) player.j = 0;
-	if (player.j > stage_data.width()) player.j = stage_data.width();
+	if (player.j > stage_data.width()) player.j = stage_data.width() - 1;
 
+	// ログの初期化
 	player_log.clear();
 	player_log << player;
+
+	stage_data_log.clear();
+	stage_data_log << stage_data;
 }
 
 // パズルの更新関数
@@ -109,6 +120,7 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 	if (KeyRight.down()) {
 		player.direction = RIGHT;
@@ -119,6 +131,7 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 	if (KeyUp.down()) {
 		player.direction = UP;
@@ -129,6 +142,7 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 	if (KeyDown.down()) {
 		player.direction = DOWN;
@@ -139,11 +153,32 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 
+	// 一歩戻る
 	if (MouseR.down() && player_log.size() > 1) {
 		player_log.pop_back();
 		player = player_log.back();
+
+		stage_data_log.pop_back();
+		stage_data = stage_data_log.back();
+	}
+
+	//扉を開ける
+	if (checkdoor()) {
+		for (int i = 0; i < stage_data.height(); i++) {
+			for (int j = 0; j < stage_data.width(); j++) {
+				if (stage_data[i][j] == DOOR) {
+					stage_data[i][j] = ROAD;
+				}
+			}
+		}
+	}
+
+	// クリア
+	if (stage_data[player.i][player.j] == GOAL) {
+		return 1;
 	}
 
 	// パズルのリセット
@@ -169,9 +204,6 @@ int puzzle_update() {
 
 // パズルの描画関数
 void puzzle_draw() {
-
-
-
 	/*** ここを編集してください ***/
 
 	for (int i = 0; i < stage_data.width(); i++) {
@@ -224,6 +256,29 @@ void puzzle_draw() {
 	SimpleGUI::Button(U"やりなおし", Vec2(120, 10));
 }
 
+
+// base_dataの初期化関数
+void baseinit() {
+	BoxNum = 0;
+	for (int i = 0; i < stage_data.height(); i++) {
+		for (int j = 0; j < stage_data.width(); j++) {
+			// 岩と箱の下には道がある
+			if (stage_data[i][j] == ROCK || stage_data[i][j] == BOX) {
+				base_data[i][j] = ROAD;
+			}
+			else {
+				base_data[i][j] = stage_data[i][j];
+			}
+
+			// 箱(配置場所)の数をカウント
+			if (stage_data[i][j] == PLACE) {
+				BoxNum++;
+			}
+		}
+	}
+}
+
+// 岩、箱が動くかの判定
 bool objstack(char t, int n) {
 	int data = -1;
 
@@ -252,6 +307,7 @@ bool objstack(char t, int n) {
 	}
 }
 
+// プレイヤーが動けるかの判定
 bool playerstack(char t, int n) {
 	int data = -1;
 
@@ -278,9 +334,61 @@ bool playerstack(char t, int n) {
 		return true;
 	}
 	else if (data == ROCK || data == BOX) {
-		return objstack(t, n);
+		if (objstack(t, n)) {
+			objmove(t, n);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else {
+		return false;
+	}
+}
+
+// 岩、箱の移動処理
+void objmove(char t, int n) {
+	if (objstack(t, n)) {
+		if (t == 'x') {
+			if (n > 0) {
+				stage_data[player.i][player.j + 2] = stage_data[player.i][player.j + 1];
+				stage_data[player.i][player.j + 1] = base_data[player.i][player.j + 1];
+			}
+			else {
+				stage_data[player.i][player.j - 2] = stage_data[player.i][player.j - 1];
+				stage_data[player.i][player.j - 1] = base_data[player.i][player.j - 1];
+			}
+		}
+		else if (t == 'y') {
+			if (n > 0) {
+				stage_data[player.i + 2][player.j] = stage_data[player.i + 1][player.j];
+				stage_data[player.i + 1][player.j] = base_data[player.i + 1][player.j];
+			}
+			else {
+				stage_data[player.i - 2][player.j] = stage_data[player.i - 1][player.j];
+				stage_data[player.i - 1][player.j] = base_data[player.i - 1][player.j];
+			}
+		}
+	}
+}
+
+// 扉が開くかの判定
+bool checkdoor(){
+	int n = 0;
+
+	for (int i = 0; i < stage_data.height(); i++) {
+		for (int j = 0; j < stage_data.width(); j++) {
+			if ((stage_data[i][j] == BOX) && (base_data[i][j] == PLACE)) {
+				n++;
+			}
+		}
+	}
+
+	if (BoxNum == n) {
+		return true;
+	}
+	else{
 		return false;
 	}
 }
