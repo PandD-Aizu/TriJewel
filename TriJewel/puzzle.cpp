@@ -2,7 +2,8 @@
 
 static Grid<int> stage_data;	// ステージ情報
 
-static Player player;
+static Player player;	// プレイヤー
+static Array<Player> player_log;	// プレイヤーの移動ログ
 
 // パズルデータ用ファイル読み込み
 void readfile(String file) {
@@ -81,7 +82,8 @@ void puzzle_init(int diff, int stage) {
 	if (player.j < 0) player.j = 0;
 	if (player.j > stage_data.width()) player.j = stage_data.width();
 
-
+	player_log.clear();
+	player_log << player;
 }
 
 // パズルの更新関数
@@ -98,6 +100,8 @@ int puzzle_update() {
 			player.x -= player.width;
 			player.j--;
 		}
+
+		player_log << player;
 	}
 	if (KeyRight.down()) {
 		player.direction = RIGHT;
@@ -106,6 +110,8 @@ int puzzle_update() {
 			player.x += player.width;
 			player.j++;
 		}
+
+		player_log << player;
 	}
 	if (KeyUp.down()) {
 		player.direction = UP;
@@ -114,6 +120,8 @@ int puzzle_update() {
 			player.y -= player.height;
 			player.i--;
 		}
+
+		player_log << player;
 	}
 	if (KeyDown.down()) {
 		player.direction = DOWN;
@@ -122,8 +130,16 @@ int puzzle_update() {
 			player.y += player.height;
 			player.i++;
 		}
+
+		player_log << player;
 	}
 
+	if (MouseR.down() && player_log.size() > 1) {
+		player_log.pop_back();
+		player = player_log.back();
+	}
+
+	// ゴール
 	if (stage_data[player.i][player.j] == GOAL) {
 		return 1;
 	}
