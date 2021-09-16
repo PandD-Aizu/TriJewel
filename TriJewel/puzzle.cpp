@@ -1,10 +1,14 @@
 #include"puzzle.h"
 
 static Grid<int> stage_data;	// ステージ情報
+static Array<Grid<int>> stage_data_log;	// ステージ情報のログ
 static Grid<int> stage_data_init;	// ステージ情報(初期状態)
+static Grid<int> base_data;		//岩や箱を除いたステージ情報
 
 static Player player;	// プレイヤー
 static Array<Player> player_log;	// プレイヤーの移動ログ
+
+int BoxNum = 0;		//配置場所（箱）の数をカウントする変数
 
 // パズルデータ用ファイル読み込み
 void readfile(String file) {
@@ -57,6 +61,9 @@ void puzzle_init(int diff, int stage) {
 		}
 	}
 
+	base_data = Grid<int>(stage_data.width(), stage_data.height(), -1);
+	baseinit();
+
 	/*
 	stage_data = {
 		{1,1,1,1,1,1,1},
@@ -67,9 +74,6 @@ void puzzle_init(int diff, int stage) {
 		{1,0,0,0,1,1,1},
 		{1,1,1,1,1,1,1}
 	};
-
-	base_data = Grid<int>(stage_data.width(), stage_data.height(), -1);
-	baseinit();
 
 	// プレイヤー初期座標
 	player.i = 5;
@@ -92,8 +96,12 @@ void puzzle_init(int diff, int stage) {
 	if (player.j < 0) player.j = 0;
 	if (player.j > stage_data.width()) player.j = stage_data.width();
 
+	// ログの初期化
 	player_log.clear();
 	player_log << player;
+
+	stage_data_log.clear();
+	stage_data_log << stage_data;
 }
 
 // パズルの更新関数
@@ -112,6 +120,7 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 	if (KeyRight.down()) {
 		player.direction = RIGHT;
@@ -122,6 +131,7 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 	if (KeyUp.down()) {
 		player.direction = UP;
@@ -132,6 +142,7 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 	if (KeyDown.down()) {
 		player.direction = DOWN;
@@ -142,30 +153,31 @@ int puzzle_update() {
 		}
 
 		player_log << player;
+		stage_data_log << stage_data;
 	}
 
+	// 一歩戻る
 	if (MouseR.down() && player_log.size() > 1) {
 		player_log.pop_back();
 		player = player_log.back();
+
+		stage_data_log.pop_back();
+		stage_data = stage_data_log.back();
 	}
 
 	//扉を開ける
-	if (BoxNum != -1) {
-		if (checkdoor()) {
-			for (int i = 0; i < stage_data.height(); i++) {
-				for (int j = 0; j < stage_data.width(); j++) {
-					if (stage_data[i][j] == 6) {
-						stage_data[i][j] = 0;
-					}
+	if (checkdoor()) {
+		for (int i = 0; i < stage_data.height(); i++) {
+			for (int j = 0; j < stage_data.width(); j++) {
+				if (stage_data[i][j] == DOOR) {
+					stage_data[i][j] = ROAD;
 				}
 			}
-
-			//何度もforが回らないようにする
-			BoxNum = -1;
 		}
 	}
 
-	if (stage_data[player.i][player.j] == 3) {
+	// クリア
+	if (stage_data[player.i][player.j] == GOAL) {
 		return 1;
 	}
 
@@ -192,9 +204,6 @@ int puzzle_update() {
 
 // パズルの描画関数
 void puzzle_draw() {
-
-
-
 	/*** ここを編集してください ***/
 
 	for (int i = 0; i < stage_data.width(); i++) {
@@ -248,24 +257,28 @@ void puzzle_draw() {
 }
 
 
-
+// base_dataの初期化関数
 void baseinit() {
+	BoxNum = 0;
 	for (int i = 0; i < stage_data.height(); i++) {
 		for (int j = 0; j < stage_data.width(); j++) {
-			if (stage_data[i][j] == (2 || 4)) {
-				base_data[i][j] = 0;
+			// 岩と箱の下には道がある
+			if (stage_data[i][j] == ROCK || stage_data[i][j] == BOX) {
+				base_data[i][j] = ROAD;
 			}
 			else {
 				base_data[i][j] = stage_data[i][j];
 			}
 
-			if (stage_data[i][j] == 5) {
+			// 箱(配置場所)の数をカウント
+			if (stage_data[i][j] == PLACE) {
 				BoxNum++;
 			}
 		}
 	}
 }
 
+// 岩、箱が動くかの判定
 bool objstack(char t, int n) {
 	int data = -1;
 
@@ -294,6 +307,7 @@ bool objstack(char t, int n) {
 	}
 }
 
+// プレイヤーが動けるかの判定
 bool playerstack(char t, int n) {
 	int data = -1;
 
@@ -319,7 +333,7 @@ bool playerstack(char t, int n) {
 	if (data == ROAD || data == GOAL || data == PLACE) {
 		return true;
 	}
-	else if (data == 2 || data == 4) {
+	else if (data == ROCK || data == BOX) {
 		if (objstack(t, n)) {
 			objmove(t, n);
 			return true;
@@ -333,10 +347,9 @@ bool playerstack(char t, int n) {
 	}
 }
 
+// 岩、箱の移動処理
 void objmove(char t, int n) {
 	if (objstack(t, n)) {
-		int data = -1;
-
 		if (t == 'x') {
 			if (n > 0) {
 				stage_data[player.i][player.j + 2] = stage_data[player.i][player.j + 1];
@@ -360,12 +373,13 @@ void objmove(char t, int n) {
 	}
 }
 
+// 扉が開くかの判定
 bool checkdoor(){
 	int n = 0;
 
 	for (int i = 0; i < stage_data.height(); i++) {
 		for (int j = 0; j < stage_data.width(); j++) {
-			if ((stage_data[i][j] == 4) && (base_data[i][j] == 5)) {
+			if ((stage_data[i][j] == BOX) && (base_data[i][j] == PLACE)) {
 				n++;
 			}
 		}
