@@ -408,6 +408,7 @@ void Main()
     TextureAsset::Register(U"ファイ", U"Data/Image/story/phi.png");
     TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
     TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
+    TextureAsset::Register(U"next", U"Data/Image/story/next.png");
 
 	// シーンマネージャーを作成
 	App manager;
