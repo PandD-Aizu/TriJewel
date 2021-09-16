@@ -176,6 +176,17 @@ int puzzle_update() {
 		}
 	}
 
+	// ğŒ‚ğ–‚½‚µ‚Ä‚¢‚È‚¢A”à‚ğ•Â‚ß‚é
+	else {
+		for (int i = 0; i < stage_data.height(); i++) {
+			for (int j = 0; j < stage_data.width(); j++) {
+				if (stage_data[i][j] == ROAD && base_data[i][j] == DOOR) {
+					stage_data[i][j] = DOOR;
+				}
+			}
+		}
+	}
+
 	// ƒNƒŠƒA
 	if (stage_data[player.i][player.j] == GOAL) {
 		return 1;
