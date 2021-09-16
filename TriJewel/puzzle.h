@@ -3,6 +3,8 @@
 
 #include <siv3D.hpp>
 
+#define STAGE_SIZE 12
+
 #define ROAD 0
 #define WALL 1
 #define ROCK 2
@@ -28,6 +30,7 @@ typedef struct {
 	int flag;	// 扉がしまっているかのフラグ
 }Block;
 
+void readfile(String); // パズルデータ用ファイル読み込み
 void puzzle_init(int, int);		// パズルの初期化
 int puzzle_update();	// パズルの更新関数
 void puzzle_draw();		// パズルの描画関数

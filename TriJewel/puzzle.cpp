@@ -4,11 +4,50 @@ static Grid<int> stage_data;	// ステージ情報
 
 static Player player;
 
+// パズルデータ用ファイル読み込み
+void readfile(String file) {
+	TextReader reader;
+	String line;
+
+	if (!reader.open(file)) {
+		throw Error(U"Failed to open `" + file + U"`");
+	}
+
+	std::stringstream ss;
+
+	stage_data = Grid<int>(STAGE_SIZE, STAGE_SIZE);
+
+	int i = 0;
+	while (reader.readLine(line)) {
+		ss << line;
+		if (i < STAGE_SIZE) {
+			for (int j = 0; j < STAGE_SIZE; j++) {
+				ss >> stage_data[i][j];
+			}
+		}
+
+		else {
+			ss >> player.i;
+			ss >> player.j;
+		}
+
+		i++;
+	}
+
+	player.x = 100 + player.j * 30;
+	player.y = 100 + player.i * 30;
+
+	reader.close();
+}
+
 // パズルの初期化
 void puzzle_init(int diff, int stage) {
 
-	// ステージ読み込み
 
+	// ステージ読み込み
+	readfile(U"./Data/Stage/test.txt");
+
+	/*
 	stage_data = {
 		{1,1,1,1,1,1,1},
 		{1,1,1,0,0,3,1},
@@ -25,6 +64,8 @@ void puzzle_init(int diff, int stage) {
 
 	player.x = 130;
 	player.y = 250;
+	*/
+
 	player.width = 30;
 	player.height = 30;
 
