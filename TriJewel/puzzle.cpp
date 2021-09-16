@@ -53,7 +53,7 @@ void puzzle_init(int diff, int stage) {
 
 
 	// ステージ読み込み
-	readfile(U"./Data/Stage/test.txt");
+	readfile(U"./Data/Stage/{}/{:0>2}.txt"_fmt(diff, stage));
 	stage_data_init = Grid<int>(stage_data.width(), stage_data.height());
 	for (int i = 0; i < stage_data.height(); i++) {
 		for (int j = 0; j < stage_data.width(); j++) {
@@ -87,14 +87,14 @@ void puzzle_init(int diff, int stage) {
 	player.height = 30;
 
 	if (player.x < 100) player.x = 100;
-	if (player.x > 250) player.x = 250;
+	if (player.x > 100 + player.width * stage_data.width()) player.x = 100 + player.width * stage_data.width();
 	if (player.y < 100) player.y = 100;
-	if (player.y > 250) player.y = 250;
+	if (player.y > 100 + player.height * stage_data.height()) player.y = 100 + player.height * stage_data.height();
 
 	if (player.i < 0) player.i = 0;
-	if (player.i > stage_data.height()) player.i = stage_data.height();
+	if (player.i > stage_data.height()) player.i = stage_data.height() - 1;
 	if (player.j < 0) player.j = 0;
-	if (player.j > stage_data.width()) player.j = stage_data.width();
+	if (player.j > stage_data.width()) player.j = stage_data.width() - 1;
 
 	// ログの初期化
 	player_log.clear();
