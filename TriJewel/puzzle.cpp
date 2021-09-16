@@ -37,6 +37,8 @@ void readfile(String file) {
 	player.x = 100 + player.j * 30;
 	player.y = 100 + player.i * 30;
 
+	player.direction = UP;
+
 	reader.close();
 }
 
@@ -90,24 +92,32 @@ int puzzle_update() {
 
 	//プレイヤー移動
 	if (KeyLeft.down()) {
+		player.direction = LEFT;
+
 		if (playerstack('x',-1)) {
 			player.x -= player.width;
 			player.j--;
 		}
 	}
 	if (KeyRight.down()) {
+		player.direction = RIGHT;
+
 		if (playerstack('x', 1)) {
 			player.x += player.width;
 			player.j++;
 		}
 	}
 	if (KeyUp.down()) {
+		player.direction = UP;
+
 		if (playerstack('y', -1)) {
 			player.y -= player.height;
 			player.i--;
 		}
 	}
 	if (KeyDown.down()) {
+		player.direction = DOWN;
+
 		if (playerstack('y', 1)) {
 			player.y += player.height;
 			player.i++;
@@ -173,7 +183,7 @@ void puzzle_draw() {
 	}
 	//主人公
 	//Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
-	TextureAsset(U"player").draw(player.x, player.y);
+	TextureAsset(U"player").rotated(player.direction * 90_deg).draw(player.x, player.y);
 }
 
 bool objstack(char t, int n) {
