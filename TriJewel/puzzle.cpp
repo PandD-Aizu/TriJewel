@@ -73,7 +73,7 @@ int puzzle_update() {
 		}
 	}
 
-	if (stage_data[player.i][player.j] == 3) {
+	if (stage_data[player.i][player.j] == GOAL) {
 		return 1;
 	}
 
@@ -89,35 +89,50 @@ void puzzle_draw() {
 
 	for (int i = 0; i < stage_data.width(); i++) {
 		for (int j = 0; j < stage_data.height(); j++) {
+			TextureAsset(U"road").draw(100 + j * 30, 100 + i * 30);
+
 			switch (stage_data[i][j]) {
-			case 0:
-				Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Green);
+			case ROAD:
+				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Green);
+				TextureAsset(U"road").draw(100 + j * 30, 100 + i * 30);
 				break;
 
-			case 1:
-				Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Gray);
+			case WALL:
+				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Gray);
+				TextureAsset(U"wall").draw(100 + j * 30, 100 + i * 30);
 				break;
 
-			case 2:
-				Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Orange);
+			case ROCK:
+				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Orange);
+				TextureAsset(U"rock").draw(100 + j * 30, 100 + i * 30);
 				break;
 
-			case 3:
-				Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Yellow);
+			case GOAL:
+				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Yellow);
+				TextureAsset(U"goal").draw(100 + j * 30, 100 + i * 30);
 				break;
 
-
-			case 4:
-				Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Black);
+			case BOX:
+				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Black);
+				TextureAsset(U"box").draw(100 + j * 30, 100 + i * 30);
 				break;
 
+			case PLACE:
+				TextureAsset(U"place").draw(100 + j * 30, 100 + i * 30);
+				break;
 
+			case DOOR:
+				TextureAsset(U"door").draw(100 + j * 30, 100 + i * 30);
+				break;
 
+			default:
+				break;
 			}
 		}
 	}
 	//ŽålŒö
-	Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
+	//Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
+	TextureAsset(U"player").draw(player.x, player.y);
 }
 
 bool objstack(char t, int n) {
@@ -140,7 +155,7 @@ bool objstack(char t, int n) {
 		}
 	}
 
-	if (data == 0 || data == 3 || data == 5) {
+	if (data == ROAD || data == GOAL || data == PLACE) {
 		return true;
 	}
 	else {
@@ -170,10 +185,10 @@ bool playerstack(char t, int n) {
 	else
 		return false;
 
-	if (data == 0 || data == 3 || data == 5) {
+	if (data == ROAD || data == GOAL || data == PLACE) {
 		return true;
 	}
-	else if (data == 2 || data == 4) {
+	else if (data == ROCK || data == BOX) {
 		return objstack(t, n);
 	}
 	else {

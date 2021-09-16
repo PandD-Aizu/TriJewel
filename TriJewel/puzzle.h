@@ -3,6 +3,14 @@
 
 #include <siv3D.hpp>
 
+#define ROAD 0
+#define WALL 1
+#define ROCK 2
+#define GOAL 3
+#define BOX 4
+#define PLACE 5
+#define DOOR 6
+
 // ƒvƒŒƒCƒ„[
 typedef struct {
 	int i, j;	// “Y‚¦š

@@ -395,10 +395,13 @@ void Main()
 
     // 画像
     TextureAsset::Register(U"player", U"Data/Image/game/player.png");
-    TextureAsset::Register(U"load", U"Data/Image/game/grass.png");
+    TextureAsset::Register(U"road", U"Data/Image/game/grass.png");
     TextureAsset::Register(U"wall", U"Data/Image/game/tree.png");
     TextureAsset::Register(U"rock", U"Data/Image/game/rock.png");
     TextureAsset::Register(U"goal", U"Data/Image/game/goal.png");
+    TextureAsset::Register(U"box", U"Data/Image/game/box.png");
+    TextureAsset::Register(U"place", U"Data/Image/game/place.png");
+    TextureAsset::Register(U"door", U"Data/Image/game/door.png");
     TextureAsset::Register(U"シロナ", U"Data/Image/story/sirona.png");
     TextureAsset::Register(U"リンドル", U"Data/Image/story/rindol.png");
     TextureAsset::Register(U"チャマ", U"Data/Image/story/chama.png");
