@@ -1,6 +1,7 @@
 #include"puzzle.h"
 
 static Grid<int> stage_data;	// ステージ情報
+static Grid<int> stage_data_init;	// ステージ情報(初期状態)
 
 static Player player;	// プレイヤー
 static Array<Player> player_log;	// プレイヤーの移動ログ
@@ -49,6 +50,12 @@ void puzzle_init(int diff, int stage) {
 
 	// ステージ読み込み
 	readfile(U"./Data/Stage/test.txt");
+	stage_data_init = Grid<int>(stage_data.width(), stage_data.height());
+	for (int i = 0; i < stage_data.height(); i++) {
+		for (int j = 0; j < stage_data.width(); j++) {
+			stage_data_init[i][j] = stage_data[i][j];
+		}
+	}
 
 	/*
 	stage_data = {
@@ -139,6 +146,19 @@ int puzzle_update() {
 		player = player_log.back();
 	}
 
+	// パズルのリセット
+	if (SimpleGUI::Button(U"やりなおし", Vec2(120, 10))) {
+		player = player_log[0];
+		player_log.clear();
+		player_log << player;
+
+		for (int i = 0; i < stage_data.height(); i++) {
+			for (int j = 0; j < stage_data.width(); j++) {
+				stage_data[i][j] = stage_data_init[i][j];
+			}
+		}
+	}
+
 	// ゴール
 	if (stage_data[player.i][player.j] == GOAL) {
 		return 1;
@@ -200,6 +220,8 @@ void puzzle_draw() {
 	//主人公
 	//Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
 	TextureAsset(U"player").rotated(player.direction * 90_deg).draw(player.x, player.y);
+
+	SimpleGUI::Button(U"やりなおし", Vec2(120, 10));
 }
 
 bool objstack(char t, int n) {
