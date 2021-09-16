@@ -1,8 +1,11 @@
 #include"puzzle.h"
 
 static Grid<int> stage_data;	// ステージ情報
+static Grid<int> base_data;		//岩や箱を除いたステージ情報
 
 static Player player;
+
+int BoxNum = 0;		//配置場所（箱）の数をカウントする変数
 
 // パズルの初期化
 void puzzle_init(int diff, int stage) {
@@ -18,6 +21,9 @@ void puzzle_init(int diff, int stage) {
 		{1,0,0,0,1,1,1},
 		{1,1,1,1,1,1,1}
 	};
+
+	base_data = Grid<int>(stage_data.width(), stage_data.height(), -1);
+	baseinit();
 
 	// プレイヤー初期座標
 	player.i = 5;
@@ -73,6 +79,26 @@ int puzzle_update() {
 		}
 	}
 
+	//扉を開ける
+	if (BoxNum != -1) {
+		if (checkdoor()) {
+			for (int i = 0; i < stage_data.height(); i++) {
+				for (int j = 0; j < stage_data.width(); j++) {
+					if (stage_data[i][j] == 6) {
+						stage_data[i][j] = 0;
+					}
+				}
+			}
+
+			//何度もforが回らないようにする
+			BoxNum = -1;
+		}
+	}
+
+	if (stage_data[player.i][player.j] == 3) {
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -114,6 +140,25 @@ void puzzle_draw() {
 	}
 	//主人公
 	Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
+}
+
+
+
+void baseinit() {
+	for (int i = 0; i < stage_data.height(); i++) {
+		for (int j = 0; j < stage_data.width(); j++) {
+			if (stage_data[i][j] == (2 || 4)) {
+				base_data[i][j] = 0;
+			}
+			else {
+				base_data[i][j] = stage_data[i][j];
+			}
+
+			if (stage_data[i][j] == 5) {
+				BoxNum++;
+			}
+		}
+	}
 }
 
 bool objstack(char t, int n) {
@@ -170,9 +215,61 @@ bool playerstack(char t, int n) {
 		return true;
 	}
 	else if (data == 2 || data == 4) {
-		return objstack(t, n);
+		if (objstack(t, n)) {
+			objmove(t, n);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else {
+		return false;
+	}
+}
+
+void objmove(char t, int n) {
+	if (objstack(t, n)) {
+		int data = -1;
+
+		if (t == 'x') {
+			if (n > 0) {
+				stage_data[player.i][player.j + 2] = stage_data[player.i][player.j + 1];
+				stage_data[player.i][player.j + 1] = base_data[player.i][player.j + 1];
+			}
+			else {
+				stage_data[player.i][player.j - 2] = stage_data[player.i][player.j - 1];
+				stage_data[player.i][player.j - 1] = base_data[player.i][player.j - 1];
+			}
+		}
+		else if (t == 'y') {
+			if (n > 0) {
+				stage_data[player.i + 2][player.j] = stage_data[player.i + 1][player.j];
+				stage_data[player.i + 1][player.j] = base_data[player.i + 1][player.j];
+			}
+			else {
+				stage_data[player.i - 2][player.j] = stage_data[player.i - 1][player.j];
+				stage_data[player.i - 1][player.j] = base_data[player.i - 1][player.j];
+			}
+		}
+	}
+}
+
+bool checkdoor(){
+	int n = 0;
+
+	for (int i = 0; i < stage_data.height(); i++) {
+		for (int j = 0; j < stage_data.width(); j++) {
+			if ((stage_data[i][j] == 4) && (base_data[i][j] == 5)) {
+				n++;
+			}
+		}
+	}
+
+	if (BoxNum == n) {
+		return true;
+	}
+	else{
 		return false;
 	}
 }
