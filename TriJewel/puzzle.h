@@ -40,6 +40,12 @@ void puzzle_init(int, int);		// パズルの初期化
 int puzzle_update();	// パズルの更新関数
 void puzzle_draw();		// パズルの描画関数
 
+void baseinit();		// base_dataの初期化関数
+
 bool objstack(char, int);	 //	岩、箱が動くかの判定
 bool playerstack(char, int);		//プレイヤーが動けるかの判定
+
+void objmove(char, int);	//岩、箱の移動処理
+
+bool checkdoor();		//扉が開くかの判定
 #endif
