@@ -48,6 +48,7 @@ void story_init(int chapter, int story) {
 
 	scene = 0;
 	start = Scene::Time() * 1000;
+	length = (int)((Scene::Time() * 1000 - start) / 50);
 	playing = 0;
 }
 
@@ -63,25 +64,27 @@ int story_update() {
 			scene++;
 			start = Scene::Time() * 1000;
 			playing = 0;
+			length = (int)((Scene::Time() * 1000 - start) / 50);
 		}
 		else {
 			length = dialogue[scene].text.length();
 		}
 	}
 
-	length = (int)((Scene::Time() * 1000 - start) / 50);
-
-	if (length > dialogue[scene].text.length()) {
+	if (length >= dialogue[scene].text.length()) {
 		playing = 1;
 	}
 
+	if (playing == 0) {
+		length = (int)((Scene::Time() * 1000 - start) / 50);
+	}
 	return 0;
 }
 
 // ストーリーの描画関数
 void story_draw() {
 	const int namebox_size = 65;
-	const int chara_size = 128;
+	const int chara_size = 128 * 1.5;
 	const String name[6] = {
 		U"シロナ",
 		U"リンドル",
@@ -92,9 +95,9 @@ void story_draw() {
 	};
 
 	if (dialogue[scene].left >= 0)
-		TextureAsset(name[dialogue[scene].left]).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
 	if (dialogue[scene].right >= 0)
-		TextureAsset(name[dialogue[scene].right]).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
 
 	if (dialogue[scene].speaker != 0) {
 		Rect namebox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - namebox_size, 150, namebox_size).draw(Palette::White).drawFrame(1, 0, Palette::Black);
@@ -103,4 +106,7 @@ void story_draw() {
 
 	Rect textbox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12, (Scene::Width() / 16) * 14, (Scene::Height() / 16) * 3).draw(Palette::White).drawFrame(1, 0, Palette::Black);
 	FontAsset(U"StoryFont")(dialogue[scene].text.substr(0, length)).draw(textbox.stretched(-10), Palette::Black);
+
+	if (playing == 1)
+		TextureAsset(U"next").draw((Scene::Width() / 16) * 14, (Scene::Height() / 16) * 14);
 }

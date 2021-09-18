@@ -4,6 +4,12 @@
 
 using App = SceneManager<String>;
 
+int clear_flag = 0;  // クリアフラグ
+int diff_before = 0;    // 直前に選ばれていた難易度
+
+int story_flag = 0; // ストーリー再生フラグ
+int chapter_before = 0; // 直前に選ばれていた章
+
 // タイトルシーン
 class Title : public App::Scene
 {
@@ -78,12 +84,14 @@ public:
     Select(const InitData& init)
         : IScene(init)
     {
-        mode = 0;
-        difficult = 0;
+        mode = clear_flag == 1 ? 1 : 0;
+        difficult = diff_before;
 
         diff_str[0] = U"かんたん";
         diff_str[1] = U"ふつう";
         diff_str[2] = U"むずかしい";
+
+        clear_flag = 0;
     }
 
     // 更新関数
@@ -104,6 +112,7 @@ public:
                 {
                     mode = 1;
                     difficult = i + 1;
+                    diff_before = difficult;
                 }
             }
 
@@ -185,12 +194,14 @@ public:
     {
         // クリアしたらステージセレクトへ戻る
         if (puzzle_update() == 1) {
+            clear_flag = 1;
             changeScene(U"Select");
         }
 
         // ステージセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
+            clear_flag = 1;
             changeScene(U"Select");
         }
     }
@@ -224,13 +235,15 @@ public:
     StorySelect(const InitData& init)
         : IScene(init)
     {
-        mode = 0;
-        chapter = 0;
+        mode = story_flag == 1 ? 1 : 0;
+        chapter = chapter_before;
         story = 0;
 
         chap_str[0] = U"物語1";
         chap_str[1] = U"物語2";
         chap_str[2] = U"物語3";
+
+        story_flag = 0;
     }
 
     // 更新関数
@@ -250,6 +263,7 @@ public:
                 {
                     mode = 1;
                     chapter = i + 1;
+                    chapter_before = chapter;
                 }
             }
 
@@ -329,12 +343,14 @@ public:
     void update() override
     {
         if (story_update() == 1) {
+            story_flag = 1;
             changeScene(U"StorySelect");
         }
 
         // ストーリーセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
+            story_flag = 1;
             changeScene(U"StorySelect");
         }
     }
@@ -395,16 +411,20 @@ void Main()
 
     // 画像
     TextureAsset::Register(U"player", U"Data/Image/game/player.png");
-    TextureAsset::Register(U"load", U"Data/Image/game/grass.png");
+    TextureAsset::Register(U"road", U"Data/Image/game/grass.png");
     TextureAsset::Register(U"wall", U"Data/Image/game/tree.png");
     TextureAsset::Register(U"rock", U"Data/Image/game/rock.png");
     TextureAsset::Register(U"goal", U"Data/Image/game/goal.png");
+    TextureAsset::Register(U"box", U"Data/Image/game/box.png");
+    TextureAsset::Register(U"place", U"Data/Image/game/place.png");
+    TextureAsset::Register(U"door", U"Data/Image/game/door.png");
     TextureAsset::Register(U"シロナ", U"Data/Image/story/sirona.png");
     TextureAsset::Register(U"リンドル", U"Data/Image/story/rindol.png");
     TextureAsset::Register(U"チャマ", U"Data/Image/story/chama.png");
     TextureAsset::Register(U"ファイ", U"Data/Image/story/phi.png");
     TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
     TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
+    TextureAsset::Register(U"next", U"Data/Image/story/next.png");
 
 	// シーンマネージャーを作成
 	App manager;
