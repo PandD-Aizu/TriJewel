@@ -57,6 +57,8 @@ void story_init(int chapter, int story) {
 // 　　　  再生を終えた場合は 1 を返す
 int story_update() {
 	if (MouseL.down()) {
+		AudioAsset(U"se_select").playOneShot();
+
 		if (playing == 1) {
 			if (scene == dialogue.size() - 1)
 				return 1;
