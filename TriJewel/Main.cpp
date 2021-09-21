@@ -58,14 +58,16 @@ public:
     {
         int button_width = 150;
 
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"title").draw(0, 0);
+        TextureAsset(U"logo").drawAt(400, 120);
 
         SimpleGUI::Button(U"はじめる", Vec2(400 - button_width / 2, 250), button_width);
         SimpleGUI::Button(U"おはなし", Vec2(400 - button_width / 2, 300), button_width);
         SimpleGUI::Button(U"あそびかた", Vec2(400 - button_width / 2, 350), button_width);
         SimpleGUI::Button(U"おわる", Vec2(400 - button_width / 2, 400), button_width);
 
-        FontAsset(U"TitleFont")(U"TriJewel(仮)").drawAt(400, 100);
+        //FontAsset(U"TitleFont")(U"TriJewel(仮)").drawAt(400, 100);
     }
 };
 
@@ -146,7 +148,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"select").draw(0, 0);
 
         switch (mode) {
             // レベル選択
@@ -296,7 +299,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"story").draw(0, 0);
 
         switch (mode) {
             // 章選択
@@ -359,7 +363,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"story").draw(0, 0);
 
         story_draw();
 
@@ -394,7 +399,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"title").draw(0, 0);
 
         drawRule();
 
@@ -406,13 +412,17 @@ public:
 
 void Main()
 {
-    Window::SetTitle(U"TriJewel(仮)");
+    Window::SetTitle(U"シロナと願いの石～みんなともだち～");
 
 	// フォント
     FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
     FontAsset::Register(U"StoryFont", 30);
 
     // 画像
+    TextureAsset::Register(U"title", U"Data/Image/title.png");
+    TextureAsset::Register(U"logo", U"Data/Image/logo.png");
+    TextureAsset::Register(U"select", U"Data/Image/select.png");
+    TextureAsset::Register(U"story", U"Data/Image/story.png");
     TextureAsset::Register(U"player", U"Data/Image/game/player.png");
     TextureAsset::Register(U"road", U"Data/Image/game/grass.png");
     TextureAsset::Register(U"wall", U"Data/Image/game/tree.png");
