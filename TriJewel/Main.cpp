@@ -195,31 +195,41 @@ public:
 // パズルシーン
 class Puzzle : public App::Scene
 {
+private:
+    int puzzle_state;   // パズルのクリア状況
 public:
 
     // コンストラクタ（必ず実装）
     Puzzle(const InitData& init)
         : IScene(init)
     {
-
+        puzzle_state = 0;
     }
 
     // 更新関数
     void update() override
     {
-        // クリアしたらステージセレクトへ戻る
-        if (puzzle_update() == 1) {
-            clear_flag = 1;
-            changeScene(U"Select");
+        // クリアしていない間、パズルを遊べる
+        if (puzzle_state == 0) {
+            puzzle_state = puzzle_update();
+
+            // ステージセレクトへ戻る
+            if (SimpleGUI::Button(U"もどる", Vec2(10, 10))) {
+                AudioAsset(U"se_cancel").playOneShot();
+
+                clear_flag = 1;
+                changeScene(U"Select");
+            }
         }
 
-        // ステージセレクトへ戻る
-        if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
-        {
-            AudioAsset(U"se_cancel").playOneShot();
+        // クリアしたら、ステージセレクトへ戻る
+        else {
+            if (MouseL.down()) {
+                AudioAsset(U"se_click").playOneShot();
 
-            clear_flag = 1;
-            changeScene(U"Select");
+                clear_flag = 1;
+                changeScene(U"Select");
+            }
         }
     }
 
@@ -232,7 +242,11 @@ public:
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
-        FontAsset(U"TitleFont")(U"パズル").drawAt(400, 100);
+        if (puzzle_state == 1) {
+            FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center());
+        }
+
+        //FontAsset(U"TitleFont")(U"パズル").drawAt(400, 100);
     }
 };
 
