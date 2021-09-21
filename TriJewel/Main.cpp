@@ -1,6 +1,7 @@
 ﻿# include <Siv3D.hpp>
 # include "puzzle.h"
 # include "story.h"
+# include "rule.h"
 
 using App = SceneManager<String>;
 
@@ -394,6 +395,8 @@ public:
     void draw() const override
     {
         Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+
+        drawRule();
 
         SimpleGUI::Button(U"タイトル", Vec2(10, 10));
 
