@@ -8,6 +8,12 @@ static Grid<int> base_data;		//岩や箱を除いたステージ情報
 static Player player;	// プレイヤー
 static Array<Player> player_log;	// プレイヤーの移動ログ
 
+// 操作ボタン
+Rect up(600, 300, 100, 100);
+Rect right(700, 400, 100, 100);
+Rect down(600, 500, 100, 100);
+Rect left(500, 400, 100, 100);
+
 int BoxNum = 0;		//配置場所（箱）の数をカウントする変数
 
 // パズルデータ用ファイル読み込み
@@ -111,7 +117,7 @@ int puzzle_update() {
 	/*** ここを編集してください ***/
 
 	//プレイヤー移動
-	if (KeyLeft.down()) {
+	if (left.intersects(Cursor::Pos()) && MouseL.down()) {
 		AudioAsset(U"se_step").playOneShot();
 
 		player.direction = LEFT;
@@ -124,7 +130,7 @@ int puzzle_update() {
 		player_log << player;
 		stage_data_log << stage_data;
 	}
-	if (KeyRight.down()) {
+	if (right.intersects(Cursor::Pos()) && MouseL.down()) {
 		AudioAsset(U"se_step").playOneShot();
 
 		player.direction = RIGHT;
@@ -137,7 +143,7 @@ int puzzle_update() {
 		player_log << player;
 		stage_data_log << stage_data;
 	}
-	if (KeyUp.down()) {
+	if (up.intersects(Cursor::Pos()) && MouseL.down()) {
 		AudioAsset(U"se_step").playOneShot();
 		
 		player.direction = UP;
@@ -150,7 +156,7 @@ int puzzle_update() {
 		player_log << player;
 		stage_data_log << stage_data;
 	}
-	if (KeyDown.down()) {
+	if (down.intersects(Cursor::Pos()) && MouseL.down()) {
 		AudioAsset(U"se_step").playOneShot();
 		
 		player.direction = DOWN;
@@ -229,62 +235,83 @@ int puzzle_update() {
 void puzzle_draw() {
 	/*** ここを編集してください ***/
 
-	// 画像を少しだけ暗くする
-	const ScopedColorMul2D state(ColorF(1, 0.8, 1, 1));
+	{
+		// 画像を少しだけ暗くする
+		const ScopedColorMul2D state(ColorF(1, 0.8, 1, 1));
 
-	// 背景
-	for (int i = 0; i * 30 - 10 < Scene::Height(); i++) {
-		for (int j = 0; j * 30 - 10 < Scene::Width(); j++) {
-			TextureAsset(U"road").draw(j * 30 - 10, i * 30 - 10);
+		// 背景
+		for (int i = 0; i * 30 - 10 < Scene::Height(); i++) {
+			for (int j = 0; j * 30 - 10 < Scene::Width(); j++) {
+				TextureAsset(U"road").draw(j * 30 - 10, i * 30 - 10);
+			}
 		}
-	}
 
-	for (int i = 0; i < stage_data.width(); i++) {
-		for (int j = 0; j < stage_data.height(); j++) {
-			TextureAsset(U"road").draw(100 + j * 30, 100 + i * 30);
-
-			switch (stage_data[i][j]) {
-			case ROAD:
-				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Green);
+		for (int i = 0; i < stage_data.width(); i++) {
+			for (int j = 0; j < stage_data.height(); j++) {
 				TextureAsset(U"road").draw(100 + j * 30, 100 + i * 30);
-				break;
 
-			case WALL:
-				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Gray);
-				TextureAsset(U"wall").draw(100 + j * 30, 100 + i * 30);
-				break;
+				switch (stage_data[i][j]) {
+				case ROAD:
+					//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Green);
+					TextureAsset(U"road").draw(100 + j * 30, 100 + i * 30);
+					break;
 
-			case ROCK:
-				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Orange);
-				TextureAsset(U"rock").draw(100 + j * 30, 100 + i * 30);
-				break;
+				case WALL:
+					//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Gray);
+					TextureAsset(U"wall").draw(100 + j * 30, 100 + i * 30);
+					break;
 
-			case GOAL:
-				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Yellow);
-				TextureAsset(U"goal").draw(100 + j * 30, 100 + i * 30);
-				break;
+				case ROCK:
+					//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Orange);
+					TextureAsset(U"rock").draw(100 + j * 30, 100 + i * 30);
+					break;
 
-			case BOX:
-				//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Black);
-				TextureAsset(U"box").draw(100 + j * 30, 100 + i * 30);
-				break;
+				case GOAL:
+					//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Yellow);
+					TextureAsset(U"goal").draw(100 + j * 30, 100 + i * 30);
+					break;
 
-			case PLACE:
-				TextureAsset(U"place").draw(100 + j * 30, 100 + i * 30);
-				break;
+				case BOX:
+					//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Black);
+					TextureAsset(U"box").draw(100 + j * 30, 100 + i * 30);
+					break;
 
-			case DOOR:
-				TextureAsset(U"door").draw(100 + j * 30, 100 + i * 30);
-				break;
+				case PLACE:
+					TextureAsset(U"place").draw(100 + j * 30, 100 + i * 30);
+					break;
 
-			default:
-				break;
+				case DOOR:
+					TextureAsset(U"door").draw(100 + j * 30, 100 + i * 30);
+					break;
+
+				default:
+					break;
+				}
 			}
 		}
 	}
 	//主人公
 	//Rect(player.x, player.y, 30, 30).draw(Palette::Blue);
 	TextureAsset(U"player").rotated(player.direction * 90_deg).draw(player.x, player.y);
+
+	// 操作ボタン
+	TextureAsset(U"button").rotated(0).draw(up.x,up.y);
+	TextureAsset(U"button").rotated(90_deg).draw(right.x, right.y);
+	TextureAsset(U"button").rotated(90_deg * 2).draw(down.x, down.y);
+	TextureAsset(U"button").rotated(90_deg * 3).draw(left.x, left.y);
+
+	if (up.intersects(Cursor::Pos())) {
+		up.draw(ColorF(1.0, 1.0, 0, 0.5));
+	}
+	if (right.intersects(Cursor::Pos())) {
+		right.draw(ColorF(1.0, 1.0, 0, 0.5));
+	}
+	if (down.intersects(Cursor::Pos())) {
+		down.draw(ColorF(1.0, 1.0, 0, 0.5));
+	}
+	if (left.intersects(Cursor::Pos())) {
+		left.draw(ColorF(1.0, 1.0, 0, 0.5));
+	}
 
 	SimpleGUI::Button(U"やりなおし", Vec2(120, 10));
 }
