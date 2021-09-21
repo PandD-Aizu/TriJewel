@@ -112,6 +112,8 @@ int puzzle_update() {
 
 	//プレイヤー移動
 	if (KeyLeft.down()) {
+		AudioAsset(U"se_step").playOneShot();
+
 		player.direction = LEFT;
 
 		if (playerstack('x',-1)) {
@@ -123,6 +125,8 @@ int puzzle_update() {
 		stage_data_log << stage_data;
 	}
 	if (KeyRight.down()) {
+		AudioAsset(U"se_step").playOneShot();
+
 		player.direction = RIGHT;
 
 		if (playerstack('x', 1)) {
@@ -134,6 +138,8 @@ int puzzle_update() {
 		stage_data_log << stage_data;
 	}
 	if (KeyUp.down()) {
+		AudioAsset(U"se_step").playOneShot();
+		
 		player.direction = UP;
 
 		if (playerstack('y', -1)) {
@@ -145,6 +151,8 @@ int puzzle_update() {
 		stage_data_log << stage_data;
 	}
 	if (KeyDown.down()) {
+		AudioAsset(U"se_step").playOneShot();
+		
 		player.direction = DOWN;
 
 		if (playerstack('y', 1)) {
@@ -158,6 +166,8 @@ int puzzle_update() {
 
 	// 一歩戻る
 	if (MouseR.down() && player_log.size() > 1) {
+		AudioAsset(U"se_step").playOneShot();
+		
 		player_log.pop_back();
 		player = player_log.back();
 
@@ -194,6 +204,8 @@ int puzzle_update() {
 
 	// パズルのリセット
 	if (SimpleGUI::Button(U"やりなおし", Vec2(120, 10))) {
+		AudioAsset(U"se_cancel").playOneShot();
+
 		player = player_log[0];
 		player_log.clear();
 		player_log << player;

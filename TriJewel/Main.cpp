@@ -31,24 +31,29 @@ public:
         // 「はじめる」ボタン
         if (SimpleGUI::Button(U"はじめる", Vec2(400 - button_width / 2, 250), button_width))
         {
+            AudioAsset(U"se_click").playOneShot();
             changeScene(U"Select");
         }
 
         // 「おはなし」ボタン
         if (SimpleGUI::Button(U"おはなし", Vec2(400 - button_width / 2, 300), button_width))
         {
+            AudioAsset(U"se_click").playOneShot();
             changeScene(U"StorySelect");
         }
 
         // 「あそびかた」ボタン
         if (SimpleGUI::Button(U"あそびかた", Vec2(400 - button_width / 2, 350), button_width))
         {
+            AudioAsset(U"se_click").playOneShot();
             changeScene(U"HowToPlay");
         }
 
         // 「おわる」ボタン
         if (SimpleGUI::Button(U"おわる", Vec2(400 - button_width / 2, 400), button_width))
         {
+            AudioAsset(U"se_cancel").play();
+            while (AudioAsset(U"se_cancel").isPlaying());
             System::Exit();
         }
     }
@@ -106,6 +111,7 @@ public:
             // タイトルへ戻る
             if (SimpleGUI::Button(U"タイトル", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
                 changeScene(U"Title");
             }
 
@@ -113,6 +119,8 @@ public:
             for (int i = 0; i < 3; i++) {
                 if (SimpleGUI::Button(diff_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     mode = 1;
                     difficult = i + 1;
                     diff_before = difficult;
@@ -126,6 +134,7 @@ public:
             // レベル選択へ戻る
             if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
                 mode = 0;
             }
 
@@ -133,6 +142,8 @@ public:
             for (int i = 0; i < 30; i++) {
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % 6), 200 + 50 * (i / 6))))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     stage = i + 1;
                     puzzle_init(difficult, stage);
                     changeScene(U"Puzzle");
@@ -205,6 +216,8 @@ public:
         // ステージセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
+            AudioAsset(U"se_cancel").playOneShot();
+
             clear_flag = 1;
             changeScene(U"Select");
         }
@@ -258,6 +271,8 @@ public:
             // タイトルへ戻る
             if (SimpleGUI::Button(U"タイトル", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
+
                 changeScene(U"Title");
             }
 
@@ -265,6 +280,8 @@ public:
             for (int i = 0; i < 3; i++) {
                 if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     mode = 1;
                     chapter = i + 1;
                     chapter_before = chapter;
@@ -277,6 +294,8 @@ public:
             // 章選択画面へ戻る
             if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
+
                 mode = 0;
             }
 
@@ -284,6 +303,8 @@ public:
             for (int i = 0; i < 10; i++) {
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5))))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     story = i + 1;
                     story_init(chapter,story);
                     changeScene(U"Story");
@@ -355,6 +376,8 @@ public:
         // ストーリーセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
+            AudioAsset(U"se_cancel").playOneShot();
+
             story_flag = 1;
             changeScene(U"StorySelect");
         }
@@ -392,6 +415,8 @@ public:
         // タイトルへ戻る
         if (SimpleGUI::Button(U"タイトル", Vec2(10, 10)))
         {
+            AudioAsset(U"se_cancel").playOneShot();
+
             changeScene(U"Title");
         }
     }
@@ -438,6 +463,12 @@ void Main()
     TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
     TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
     TextureAsset::Register(U"next", U"Data/Image/story/next.png");
+
+    // 音
+    AudioAsset::Register(U"se_click", U"Data/Sound/se/click.ogg");
+    AudioAsset::Register(U"se_cancel", U"Data/Sound/se/cancel.ogg");
+    AudioAsset::Register(U"se_step", U"Data/Sound/se/step.ogg");
+    AudioAsset::Register(U"se_select", U"Data/Sound/se/select.ogg");
 
 	// シーンマネージャーを作成
 	App manager;
