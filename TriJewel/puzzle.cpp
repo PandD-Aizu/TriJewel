@@ -229,6 +229,16 @@ int puzzle_update() {
 void puzzle_draw() {
 	/*** ‚±‚±‚ğ•ÒW‚µ‚Ä‚­‚¾‚³‚¢ ***/
 
+	// ‰æ‘œ‚ğ­‚µ‚¾‚¯ˆÃ‚­‚·‚é
+	const ScopedColorMul2D state(ColorF(1, 0.8, 1, 1));
+
+	// ”wŒi
+	for (int i = 0; i * 30 - 10 < Scene::Height(); i++) {
+		for (int j = 0; j * 30 - 10 < Scene::Width(); j++) {
+			TextureAsset(U"road").draw(j * 30 - 10, i * 30 - 10);
+		}
+	}
+
 	for (int i = 0; i < stage_data.width(); i++) {
 		for (int j = 0; j < stage_data.height(); j++) {
 			TextureAsset(U"road").draw(100 + j * 30, 100 + i * 30);
