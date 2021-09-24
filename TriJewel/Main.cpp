@@ -20,7 +20,8 @@ public:
     Title(const InitData& init)
         : IScene(init)
     {
-
+        AudioAsset(U"bgm_title").setLoop(true);
+        AudioAsset(U"bgm_title").play();
     }
 
     // 更新関数
@@ -33,6 +34,7 @@ public:
         {
             AudioAsset(U"se_click").playOneShot();
             changeScene(U"Select");
+            AudioAsset(U"bgm_title").stop();
         }
 
         // 「おはなし」ボタン
@@ -40,6 +42,7 @@ public:
         {
             AudioAsset(U"se_click").playOneShot();
             changeScene(U"StorySelect");
+            AudioAsset(U"bgm_title").stop();
         }
 
         // 「あそびかた」ボタン
@@ -47,6 +50,7 @@ public:
         {
             AudioAsset(U"se_click").playOneShot();
             changeScene(U"HowToPlay");
+            AudioAsset(U"bgm_title").stop();
         }
 
         // 「おわる」ボタン
@@ -197,6 +201,7 @@ class Puzzle : public App::Scene
 {
 private:
     int puzzle_state;   // パズルのクリア状況
+    s3d::Audio bgm; // BGM
 public:
 
     // コンストラクタ（必ず実装）
@@ -204,6 +209,10 @@ public:
         : IScene(init)
     {
         puzzle_state = 0;
+        bgm = AudioAsset(U"bgm_stage{}"_fmt(diff_before));
+
+        bgm.setLoop(true);
+        bgm.play();
     }
 
     // 更新関数
@@ -215,16 +224,31 @@ public:
 
             // ステージセレクトへ戻る
             if (SimpleGUI::Button(U"もどる", Vec2(10, 10))) {
+                if (bgm.isPlaying()) {
+                    bgm.stop();
+                }
+
                 AudioAsset(U"se_cancel").playOneShot();
 
                 clear_flag = 1;
+
                 changeScene(U"Select");
             }
         }
 
         // クリアしたら、ステージセレクトへ戻る
         else {
+            if (bgm.isPlaying()) {
+                bgm.stop();
+            }
+
+            if (puzzle_state == 1) {
+                AudioAsset(U"bgm_clear").play();
+                puzzle_state = 2;
+            }
+
             if (MouseL.down()) {
+                AudioAsset(U"bgm_clear").stop();
                 AudioAsset(U"se_click").playOneShot();
 
                 clear_flag = 1;
@@ -242,7 +266,7 @@ public:
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
-        if (puzzle_state == 1) {
+        if (puzzle_state != 0) {
             FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center());
         }
 
@@ -376,13 +400,15 @@ public:
     Story(const InitData& init)
         : IScene(init)
     {
-
+        AudioAsset(U"bgm_story").setLoop(true);
+        AudioAsset(U"bgm_story").play();
     }
 
     // 更新関数
     void update() override
     {
         if (story_update() == 1) {
+            AudioAsset(U"bgm_story").stop();
             story_flag = 1;
             changeScene(U"StorySelect");
         }
@@ -390,6 +416,7 @@ public:
         // ストーリーセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
+            AudioAsset(U"bgm_story").stop();
             AudioAsset(U"se_cancel").playOneShot();
 
             story_flag = 1;
@@ -483,11 +510,19 @@ void Main()
     TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
     TextureAsset::Register(U"next", U"Data/Image/story/next.png");
 
-    // 音
+    // 効果音
     AudioAsset::Register(U"se_click", U"Data/Sound/se/click.ogg");
     AudioAsset::Register(U"se_cancel", U"Data/Sound/se/cancel.ogg");
     AudioAsset::Register(U"se_step", U"Data/Sound/se/step.ogg");
     AudioAsset::Register(U"se_select", U"Data/Sound/se/select.ogg");
+
+    // BGM
+    AudioAsset::Register(U"bgm_title", U"Data/Sound/bgm/title.ogg");
+    AudioAsset::Register(U"bgm_stage1", U"Data/Sound/bgm/stage1.ogg");
+    AudioAsset::Register(U"bgm_stage2", U"Data/Sound/bgm/stage2.ogg");
+    AudioAsset::Register(U"bgm_stage3", U"Data/Sound/bgm/stage3.ogg");
+    AudioAsset::Register(U"bgm_clear", U"Data/Sound/bgm/clear.ogg");
+    AudioAsset::Register(U"bgm_story", U"Data/Sound/bgm/story.ogg");
 
 	// シーンマネージャーを作成
 	App manager;
