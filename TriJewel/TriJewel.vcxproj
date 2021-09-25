@@ -110,6 +110,7 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="puzzle.cpp" />
+    <ClCompile Include="rule.cpp" />
     <ClCompile Include="story.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -238,6 +239,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="puzzle.h" />
+    <ClInclude Include="rule.h" />
     <ClInclude Include="story.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

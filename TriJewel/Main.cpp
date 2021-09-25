@@ -1,6 +1,7 @@
 ﻿# include <Siv3D.hpp>
 # include "puzzle.h"
 # include "story.h"
+# include "rule.h"
 
 using App = SceneManager<String>;
 
@@ -19,7 +20,8 @@ public:
     Title(const InitData& init)
         : IScene(init)
     {
-
+        AudioAsset(U"bgm_title").setLoop(true);
+        AudioAsset(U"bgm_title").play();
     }
 
     // 更新関数
@@ -30,24 +32,32 @@ public:
         // 「はじめる」ボタン
         if (SimpleGUI::Button(U"はじめる", Vec2(400 - button_width / 2, 250), button_width))
         {
+            AudioAsset(U"se_click").playOneShot();
             changeScene(U"Select");
+            AudioAsset(U"bgm_title").stop();
         }
 
         // 「おはなし」ボタン
         if (SimpleGUI::Button(U"おはなし", Vec2(400 - button_width / 2, 300), button_width))
         {
+            AudioAsset(U"se_click").playOneShot();
             changeScene(U"StorySelect");
+            AudioAsset(U"bgm_title").stop();
         }
 
         // 「あそびかた」ボタン
         if (SimpleGUI::Button(U"あそびかた", Vec2(400 - button_width / 2, 350), button_width))
         {
+            AudioAsset(U"se_click").playOneShot();
             changeScene(U"HowToPlay");
+            AudioAsset(U"bgm_title").stop();
         }
 
         // 「おわる」ボタン
         if (SimpleGUI::Button(U"おわる", Vec2(400 - button_width / 2, 400), button_width))
         {
+            AudioAsset(U"se_cancel").play();
+            while (AudioAsset(U"se_cancel").isPlaying());
             System::Exit();
         }
     }
@@ -57,14 +67,16 @@ public:
     {
         int button_width = 150;
 
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"title").draw(0, 0);
+        TextureAsset(U"logo").drawAt(400, 120);
 
         SimpleGUI::Button(U"はじめる", Vec2(400 - button_width / 2, 250), button_width);
         SimpleGUI::Button(U"おはなし", Vec2(400 - button_width / 2, 300), button_width);
         SimpleGUI::Button(U"あそびかた", Vec2(400 - button_width / 2, 350), button_width);
         SimpleGUI::Button(U"おわる", Vec2(400 - button_width / 2, 400), button_width);
 
-        FontAsset(U"TitleFont")(U"TriJewel(仮)").drawAt(400, 100);
+        //FontAsset(U"TitleFont")(U"TriJewel(仮)").drawAt(400, 100);
     }
 };
 
@@ -103,6 +115,7 @@ public:
             // タイトルへ戻る
             if (SimpleGUI::Button(U"タイトル", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
                 changeScene(U"Title");
             }
 
@@ -110,6 +123,8 @@ public:
             for (int i = 0; i < 3; i++) {
                 if (SimpleGUI::Button(diff_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     mode = 1;
                     difficult = i + 1;
                     diff_before = difficult;
@@ -123,6 +138,7 @@ public:
             // レベル選択へ戻る
             if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
                 mode = 0;
             }
 
@@ -130,6 +146,8 @@ public:
             for (int i = 0; i < 30; i++) {
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % 6), 200 + 50 * (i / 6))))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     stage = i + 1;
                     puzzle_init(difficult, stage);
                     changeScene(U"Puzzle");
@@ -145,7 +163,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"select").draw(0, 0);
 
         switch (mode) {
             // レベル選択
@@ -180,29 +199,61 @@ public:
 // パズルシーン
 class Puzzle : public App::Scene
 {
+private:
+    int puzzle_state;   // パズルのクリア状況
+    s3d::Audio bgm; // BGM
 public:
 
     // コンストラクタ（必ず実装）
     Puzzle(const InitData& init)
         : IScene(init)
     {
+        puzzle_state = 0;
+        bgm = AudioAsset(U"bgm_stage{}"_fmt(diff_before));
 
+        bgm.setLoop(true);
+        bgm.play();
     }
 
     // 更新関数
     void update() override
     {
-        // クリアしたらステージセレクトへ戻る
-        if (puzzle_update() == 1) {
-            clear_flag = 1;
-            changeScene(U"Select");
+        // クリアしていない間、パズルを遊べる
+        if (puzzle_state == 0) {
+            puzzle_state = puzzle_update();
+
+            // ステージセレクトへ戻る
+            if (SimpleGUI::Button(U"もどる", Vec2(10, 10))) {
+                if (bgm.isPlaying()) {
+                    bgm.stop();
+                }
+
+                AudioAsset(U"se_cancel").playOneShot();
+
+                clear_flag = 1;
+
+                changeScene(U"Select");
+            }
         }
 
-        // ステージセレクトへ戻る
-        if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
-        {
-            clear_flag = 1;
-            changeScene(U"Select");
+        // クリアしたら、ステージセレクトへ戻る
+        else {
+            if (bgm.isPlaying()) {
+                bgm.stop();
+            }
+
+            if (puzzle_state == 1) {
+                AudioAsset(U"bgm_clear").play();
+                puzzle_state = 2;
+            }
+
+            if (MouseL.down()) {
+                AudioAsset(U"bgm_clear").stop();
+                AudioAsset(U"se_click").playOneShot();
+
+                clear_flag = 1;
+                changeScene(U"Select");
+            }
         }
     }
 
@@ -215,7 +266,11 @@ public:
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
-        FontAsset(U"TitleFont")(U"パズル").drawAt(400, 100);
+        if (puzzle_state != 0) {
+            FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center());
+        }
+
+        //FontAsset(U"TitleFont")(U"パズル").drawAt(400, 100);
     }
 };
 
@@ -254,6 +309,8 @@ public:
             // タイトルへ戻る
             if (SimpleGUI::Button(U"タイトル", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
+
                 changeScene(U"Title");
             }
 
@@ -261,6 +318,8 @@ public:
             for (int i = 0; i < 3; i++) {
                 if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     mode = 1;
                     chapter = i + 1;
                     chapter_before = chapter;
@@ -273,6 +332,8 @@ public:
             // 章選択画面へ戻る
             if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
             {
+                AudioAsset(U"se_cancel").playOneShot();
+
                 mode = 0;
             }
 
@@ -280,6 +341,8 @@ public:
             for (int i = 0; i < 10; i++) {
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5))))
                 {
+                    AudioAsset(U"se_click").playOneShot();
+
                     story = i + 1;
                     story_init(chapter,story);
                     changeScene(U"Story");
@@ -295,7 +358,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"story").draw(0, 0);
 
         switch (mode) {
             // 章選択
@@ -336,13 +400,15 @@ public:
     Story(const InitData& init)
         : IScene(init)
     {
-
+        AudioAsset(U"bgm_story").setLoop(true);
+        AudioAsset(U"bgm_story").play();
     }
 
     // 更新関数
     void update() override
     {
         if (story_update() == 1) {
+            AudioAsset(U"bgm_story").stop();
             story_flag = 1;
             changeScene(U"StorySelect");
         }
@@ -350,6 +416,9 @@ public:
         // ストーリーセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
+            AudioAsset(U"bgm_story").stop();
+            AudioAsset(U"se_cancel").playOneShot();
+
             story_flag = 1;
             changeScene(U"StorySelect");
         }
@@ -358,7 +427,8 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"story").draw(0, 0);
 
         story_draw();
 
@@ -386,6 +456,8 @@ public:
         // タイトルへ戻る
         if (SimpleGUI::Button(U"タイトル", Vec2(10, 10)))
         {
+            AudioAsset(U"se_cancel").playOneShot();
+
             changeScene(U"Title");
         }
     }
@@ -393,7 +465,10 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
-        Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
+        TextureAsset(U"title").draw(0, 0);
+
+        drawRule();
 
         SimpleGUI::Button(U"タイトル", Vec2(10, 10));
 
@@ -403,13 +478,20 @@ public:
 
 void Main()
 {
-    Window::SetTitle(U"TriJewel(仮)");
+    Window::SetTitle(U"シロナと願いの石～みんなともだち～");
 
 	// フォント
     FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
     FontAsset::Register(U"StoryFont", 30);
 
     // 画像
+    TextureAsset::Register(U"title", U"Data/Image/title.png");
+    TextureAsset::Register(U"logo", U"Data/Image/logo.png");
+
+    TextureAsset::Register(U"select", U"Data/Image/select.png");
+    
+    TextureAsset::Register(U"story", U"Data/Image/story.png");
+    
     TextureAsset::Register(U"player", U"Data/Image/game/player.png");
     TextureAsset::Register(U"road", U"Data/Image/game/grass.png");
     TextureAsset::Register(U"wall", U"Data/Image/game/tree.png");
@@ -418,6 +500,8 @@ void Main()
     TextureAsset::Register(U"box", U"Data/Image/game/box.png");
     TextureAsset::Register(U"place", U"Data/Image/game/place.png");
     TextureAsset::Register(U"door", U"Data/Image/game/door.png");
+    TextureAsset::Register(U"button", U"Data/Image/game/button.png");
+
     TextureAsset::Register(U"シロナ", U"Data/Image/story/sirona.png");
     TextureAsset::Register(U"リンドル", U"Data/Image/story/rindol.png");
     TextureAsset::Register(U"チャマ", U"Data/Image/story/chama.png");
@@ -425,6 +509,20 @@ void Main()
     TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
     TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
     TextureAsset::Register(U"next", U"Data/Image/story/next.png");
+
+    // 効果音
+    AudioAsset::Register(U"se_click", U"Data/Sound/se/click.ogg");
+    AudioAsset::Register(U"se_cancel", U"Data/Sound/se/cancel.ogg");
+    AudioAsset::Register(U"se_step", U"Data/Sound/se/step.ogg");
+    AudioAsset::Register(U"se_select", U"Data/Sound/se/select.ogg");
+
+    // BGM
+    AudioAsset::Register(U"bgm_title", U"Data/Sound/bgm/title.ogg");
+    AudioAsset::Register(U"bgm_stage1", U"Data/Sound/bgm/stage1.ogg");
+    AudioAsset::Register(U"bgm_stage2", U"Data/Sound/bgm/stage2.ogg");
+    AudioAsset::Register(U"bgm_stage3", U"Data/Sound/bgm/stage3.ogg");
+    AudioAsset::Register(U"bgm_clear", U"Data/Sound/bgm/clear.ogg");
+    AudioAsset::Register(U"bgm_story", U"Data/Sound/bgm/story.ogg");
 
 	// シーンマネージャーを作成
 	App manager;

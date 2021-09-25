@@ -108,6 +108,9 @@
     <ClCompile Include="story.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -393,6 +396,9 @@
     </ClInclude>
     <ClInclude Include="puzzle.h">
 >>>>>>> ed8e04871f9b04f2ec1103d0274708d2a08317a8
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
