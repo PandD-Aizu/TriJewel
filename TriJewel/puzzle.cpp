@@ -48,8 +48,6 @@ void readfile(String file) {
 	reader.close();
 }
 
-int BoxNum = 0;		//配置場所（箱）の数をカウントする変数
-
 // パズルの初期化
 void puzzle_init(int diff, int stage) {
 
