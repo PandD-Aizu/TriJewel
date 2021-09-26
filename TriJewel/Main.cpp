@@ -95,8 +95,6 @@ public:
     {
         AudioAsset(U"bgm_title").setLoop(true);
         AudioAsset(U"bgm_title").play();
-
-        readSave();
     }
 
     // 更新関数
@@ -221,7 +219,7 @@ public:
 
             // パズル画面へ移動する
             for (int i = 0; i < STAGE_NUM; i++) {
-                bool cond = (save.total[diff_before] > i - init_stage);
+                bool cond = (save.total[diff_before - 1] > i - init_stage);
 
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage)), unspecified, cond))
                 {
@@ -264,7 +262,7 @@ public:
             SimpleGUI::Button(U"もどる", Vec2(10, 10));
             // ステージ番号
             for (int i = 0; i < STAGE_NUM; i++) {
-                bool cond = (save.total[diff_before] > i - init_stage);
+                bool cond = (save.total[diff_before - 1] > i - init_stage);
                 SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage)), unspecified, cond);
             }
             break;
@@ -435,7 +433,9 @@ public:
 
             // ストーリー再生画面へ移動する
             for (int i = 0; i < STORY_NUM; i++) {
-                if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5))))
+                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
+
+                if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)), unspecified, cond))
                 {
                     AudioAsset(U"se_click").playOneShot();
 
@@ -477,7 +477,8 @@ public:
             SimpleGUI::Button(U"もどる", Vec2(10, 10));
             // 話数
             for (int i = 0; i < STORY_NUM; i++) {
-                SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)));
+                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
+                SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)), unspecified, cond);
             }
             break;
 
@@ -635,6 +636,7 @@ void Main()
     manager.add<Story>(U"Story");
     manager.add<HowToPlay>(U"HowToPlay");
 
+    readSave();
 	while (System::Update())
 	{
         // 現在のシーンを実行
