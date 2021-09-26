@@ -5,11 +5,84 @@
 
 using App = SceneManager<String>;
 
+#define DIFF_NUM 3  // 難易度数
+#define STAGE_NUM 30    // ステージ数
+
+#define CHAPTER_NUM 3   // 章の数
+#define STORY_NUM 10    // 物語の数
+
+// セーブデータ
+typedef struct {
+    int data[DIFF_NUM][STAGE_NUM];  // ステージのクリア状況
+    int total[DIFF_NUM];    // クリアしたステージの合計(難易度別)
+}SaveData;
+
+SaveData save;  // セーブデータ
+
 int clear_flag = 0;  // クリアフラグ
 int diff_before = 0;    // 直前に選ばれていた難易度
+int stage_before = 0;   // 直前に選ばれていたステージ
 
 int story_flag = 0; // ストーリー再生フラグ
 int chapter_before = 0; // 直前に選ばれていた章
+
+// クリアしたステージの合計(難易度別)
+void updateSave() {
+    for (int i = 0; i < DIFF_NUM; i++) {
+        save.total[i] = 0;
+        for (int j = 0; j < STAGE_NUM; j++) {
+            save.total[i] += save.data[i][j];
+        }
+    }
+}
+
+// セーブデータ読み込み
+void readSave() {
+    TextReader reader;
+    String line;
+
+    if (!reader.open(U"Data/Save/save.txt")) {
+        throw Error(U"Failed to open save.txt");
+    }
+
+    std::stringstream ss;
+
+    // ステージクリア状況
+    for (int i = 0; i < DIFF_NUM; i++) {
+        reader.readLine(line);
+        ss << line;
+        for (int j = 0; j < STAGE_NUM; j++) {
+            ss >> save.data[i][j];
+        }
+    }
+
+    reader.close();
+
+    // クリアしたステージの合計(難易度別)
+    updateSave();
+}
+
+// セーブデータ上書き
+void writeSave() {
+    TextWriter writer;
+    String line;
+
+    if (!writer.open(U"Data/Save/save.txt")) {
+        throw Error(U"Failed to open save.txt");
+    }
+
+    std::stringstream ss;
+
+    // ステージクリア状況
+    for (int i = 0; i < DIFF_NUM; i++) {
+        for (int j = 0; j < STAGE_NUM; j++) {
+            writer.write(U"{} "_fmt(save.data[i][j]));
+        }
+        writer.writeln(U"");
+    }
+
+    writer.close();
+}
 
 // タイトルシーン
 class Title : public App::Scene
@@ -22,6 +95,8 @@ public:
     {
         AudioAsset(U"bgm_title").setLoop(true);
         AudioAsset(U"bgm_title").play();
+
+        readSave();
     }
 
     // 更新関数
@@ -88,7 +163,9 @@ private:
     int difficult;  // 難易度
     int stage;      // ステージ番号
 
-    s3d::String diff_str[3];   // 難易度を表す文字列
+    s3d::String diff_str[DIFF_NUM];   // 難易度を表す文字列
+
+    const int init_stage = 6;   // 最初から開放されているステージ
 
 public:
 
@@ -120,7 +197,7 @@ public:
             }
 
             // どれかのレベルが選択されたら、ステージ選択へ移動する
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < DIFF_NUM; i++) {
                 if (SimpleGUI::Button(diff_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
                 {
                     AudioAsset(U"se_click").playOneShot();
@@ -143,12 +220,15 @@ public:
             }
 
             // パズル画面へ移動する
-            for (int i = 0; i < 30; i++) {
-                if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % 6), 200 + 50 * (i / 6))))
+            for (int i = 0; i < STAGE_NUM; i++) {
+                bool cond = (save.total[diff_before] > i - init_stage);
+
+                if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage)), unspecified, cond))
                 {
                     AudioAsset(U"se_click").playOneShot();
 
                     stage = i + 1;
+                    stage_before = stage;
                     puzzle_init(difficult, stage);
                     changeScene(U"Puzzle");
                 }
@@ -173,7 +253,7 @@ public:
             SimpleGUI::Button(U"タイトル", Vec2(10, 10));
 
             // 難易度ボタン
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < DIFF_NUM; i++) {
                 SimpleGUI::Button(diff_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150);
             }
             break;
@@ -183,8 +263,9 @@ public:
             // 戻るボタン
             SimpleGUI::Button(U"もどる", Vec2(10, 10));
             // ステージ番号
-            for (int i = 0; i < 30; i++) {
-                SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % 6), 200 + 50 * (i / 6)));
+            for (int i = 0; i < STAGE_NUM; i++) {
+                bool cond = (save.total[diff_before] > i - init_stage);
+                SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage)), unspecified, cond);
             }
             break;
 
@@ -251,6 +332,9 @@ public:
                 AudioAsset(U"bgm_clear").stop();
                 AudioAsset(U"se_click").playOneShot();
 
+                save.data[diff_before - 1][stage_before - 1] = 1;
+                updateSave();
+
                 clear_flag = 1;
                 changeScene(U"Select");
             }
@@ -282,7 +366,7 @@ private:
     int chapter;    // 章番号
     int story;  // 話数
 
-    s3d::String chap_str[3];   // 章を表す文字列
+    s3d::String chap_str[CHAPTER_NUM];   // 章を表す文字列
 
 public:
 
@@ -327,7 +411,7 @@ public:
             }
 
             // どれかの物語が選択されたら、話数選択画面へ移動する
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < CHAPTER_NUM; i++) {
                 if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
                 {
                     AudioAsset(U"se_click").playOneShot();
@@ -350,7 +434,7 @@ public:
             }
 
             // ストーリー再生画面へ移動する
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < STORY_NUM; i++) {
                 if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5))))
                 {
                     AudioAsset(U"se_click").playOneShot();
@@ -382,7 +466,7 @@ public:
             SimpleGUI::Button(U"はじまり", Vec2(100, Scene::Height() / 4 + 50), 150);
 
             // 各章ボタン
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < CHAPTER_NUM; i++) {
                 SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150);
             }
             break;
@@ -392,7 +476,7 @@ public:
             // 戻るボタン
             SimpleGUI::Button(U"もどる", Vec2(10, 10));
             // 話数
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < STORY_NUM; i++) {
                 SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)));
             }
             break;
@@ -559,4 +643,6 @@ void Main()
             break;
         }
 	}
+
+    writeSave();
 }
