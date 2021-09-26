@@ -11,7 +11,7 @@ static int length;	// 表示させるセリフの長さ
 // ストーリーの初期化
 void story_init(int chapter, int story) {
 	// ファイル読み込み用変数
-	TextReader reader(U"Data/Story/test.txt");
+	TextReader reader(U"Data/Story/{}/{}.txt"_fmt(chapter, story));
 	String line;
 
 	// 読み込みデータ
@@ -133,10 +133,25 @@ void story_draw() {
 		U"メルヴィ"
 	};
 
-	if (dialogue[scene].left >= 0)
-		TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
-	if (dialogue[scene].right >= 0)
-		TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+	if (dialogue[scene].left >= 0) {
+		if (dialogue[scene].speaker != 1) {
+			const ScopedColorMul2D state(ColorF(0.6, 0.6, 0.6));
+			TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+		else {
+			TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+	}
+
+	if (dialogue[scene].right >= 0) {
+		if (dialogue[scene].speaker != 2) {
+			const ScopedColorMul2D state(ColorF(0.6, 0.6, 0.6));
+			TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+		else {
+			TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+	}
 
 	if (dialogue[scene].speaker != 0) {
 		Rect namebox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - namebox_size, 150, namebox_size).draw(Palette::White).drawFrame(1, 0, Palette::Black);

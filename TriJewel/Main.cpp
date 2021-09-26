@@ -290,7 +290,7 @@ public:
     StorySelect(const InitData& init)
         : IScene(init)
     {
-        mode = story_flag == 1 ? 1 : 0;
+        mode = (story_flag == 1 && chapter_before != 0) ? 1 : 0;
         chapter = chapter_before;
         story = 0;
 
@@ -312,6 +312,18 @@ public:
                 AudioAsset(U"se_cancel").playOneShot();
 
                 changeScene(U"Title");
+            }
+
+            // プロローグ
+            if (SimpleGUI::Button(U"はじまり", Vec2(50, Scene::Height() / 4 + 50), 150))
+            {
+                AudioAsset(U"se_click").playOneShot();
+
+                chapter = 0;
+                chapter_before = chapter;
+                story = 0;
+                story_init(chapter, story);
+                changeScene(U"Story");
             }
 
             // どれかの物語が選択されたら、話数選択画面へ移動する
@@ -367,6 +379,8 @@ public:
             // タイトルへ戻るボタン
             SimpleGUI::Button(U"タイトル", Vec2(10, 10));
 
+            SimpleGUI::Button(U"はじまり", Vec2(100, Scene::Height() / 4 + 50), 150);
+
             // 各章ボタン
             for (int i = 0; i < 3; i++) {
                 SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150);
@@ -407,7 +421,8 @@ public:
     void update() override
     {
         if (story_update() == 1) {
-            AudioAsset(U"bgm_story").stop();
+            AudioAsset(U"bgm_story1").stop();
+            AudioAsset(U"bgm_story2").stop();
             story_flag = 1;
             changeScene(U"StorySelect");
         }
@@ -415,7 +430,8 @@ public:
         // ストーリーセレクトへ戻る
         if (SimpleGUI::Button(U"もどる", Vec2(10, 10)))
         {
-            AudioAsset(U"bgm_story").stop();
+            AudioAsset(U"bgm_story1").stop();
+            AudioAsset(U"bgm_story2").stop();
             AudioAsset(U"se_cancel").playOneShot();
 
             story_flag = 1;
