@@ -400,8 +400,7 @@ public:
     Story(const InitData& init)
         : IScene(init)
     {
-        AudioAsset(U"bgm_story").setLoop(true);
-        AudioAsset(U"bgm_story").play();
+
     }
 
     // 更新関数
@@ -522,7 +521,8 @@ void Main()
     AudioAsset::Register(U"bgm_stage2", U"Data/Sound/bgm/stage2.ogg");
     AudioAsset::Register(U"bgm_stage3", U"Data/Sound/bgm/stage3.ogg");
     AudioAsset::Register(U"bgm_clear", U"Data/Sound/bgm/clear.ogg");
-    AudioAsset::Register(U"bgm_story", U"Data/Sound/bgm/story.ogg");
+    AudioAsset::Register(U"bgm_story1", U"Data/Sound/bgm/story.ogg");
+    AudioAsset::Register(U"bgm_story2", U"Data/Sound/bgm/story2.ogg");
 
 	// シーンマネージャーを作成
 	App manager;
