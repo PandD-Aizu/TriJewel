@@ -28,18 +28,20 @@ void story_init(int chapter, int story) {
 
 	// ƒtƒ@ƒCƒ‹“Ç‚İ‚İ
 	while (1) {
-		reader.readLine(line);
-		left = Parse<int>(line);
+		Dialogue d;
 
 		reader.readLine(line);
-		right = Parse<int>(line);
+		d.left = Parse<int>(line);
+
+		reader.readLine(line);
+		d.right = Parse<int>(line);
 		
 		reader.readLine(text);
 		
 		reader.readLine(line);
-		speaker = Parse<int>(line);
+		d.speaker = Parse<int>(line);
 
-		dialogue.push_back(Dialogue(left, right, text, speaker));
+		dialogue.push_back(d);
 
 		if (!reader.readLine(line)) break;
 	}
