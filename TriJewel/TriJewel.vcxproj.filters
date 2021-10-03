@@ -385,10 +385,17 @@
     </Xml>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
+    <ClInclude Include="puzzle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="story.h">
+=======
     <ClInclude Include="story.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="puzzle.h">
+>>>>>>> ed8e04871f9b04f2ec1103d0274708d2a08317a8
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rule.h">

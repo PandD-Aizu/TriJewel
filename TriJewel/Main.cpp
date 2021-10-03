@@ -583,6 +583,7 @@ void Main()
 	// フォント
     FontAsset::Register(U"TitleFont", 60, Typeface::Heavy);
     FontAsset::Register(U"StoryFont", 30);
+    FontAsset::Register(U"RuleFont", 25);
 
     // 画像
     TextureAsset::Register(U"title", U"Data/Image/title.png");
