@@ -81,6 +81,9 @@ void puzzle_init(int diff, int stage) {
 		{1,1,1,1,1,1,1}
 	};
 
+	base_data = Grid<int>(stage_data.width(), stage_data.height(), -1);
+	baseinit();
+
 	// プレイヤー初期座標
 	player.i = 5;
 	player.j = 1;
