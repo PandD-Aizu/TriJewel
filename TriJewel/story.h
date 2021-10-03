@@ -16,6 +16,7 @@ typedef struct {
 	int left, right;	// 左に立つキャラ、右に立つキャラ(各キャラには 0～5 の番号が割り振られます。-1の場合、キャラは表示されません)
 	s3d::String text;	// セリフ
 	int speaker;	// 話者(0: 誰も喋らない、1: 左のキャラ、2: 右のキャラ)
+	int bgm;	// 再生するBGM(0: ほのぼの、1: フィナーレ)
 }Dialogue;
 
 void story_init(int, int);	// ストーリーの初期化

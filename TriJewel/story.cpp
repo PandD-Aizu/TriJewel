@@ -11,7 +11,7 @@ static int length;	// 表示させるセリフの長さ
 // ストーリーの初期化
 void story_init(int chapter, int story) {
 	// ファイル読み込み用変数
-	TextReader reader(U"Data/Story/test.txt");
+	TextReader reader(U"Data/Story/{}/{}.txt"_fmt(chapter, story));
 	String line;
 
 	// 読み込みデータ
@@ -28,18 +28,23 @@ void story_init(int chapter, int story) {
 
 	// ファイル読み込み
 	while (1) {
-		reader.readLine(line);
-		left = Parse<int>(line);
+		Dialogue d;
 
 		reader.readLine(line);
-		right = Parse<int>(line);
-		
-		reader.readLine(text);
-		
-		reader.readLine(line);
-		speaker = Parse<int>(line);
+		d.left = Parse<int>(line);
 
-		dialogue.push_back(Dialogue(left, right, text, speaker));
+		reader.readLine(line);
+		d.right = Parse<int>(line);
+
+		reader.readLine(d.text);
+
+		reader.readLine(line);
+		d.speaker = Parse<int>(line);
+
+		reader.readLine(line);
+		d.bgm = Parse<int>(line);
+
+		dialogue.push_back(d);
 
 		if (!reader.readLine(line)) break;
 	}
@@ -56,27 +61,59 @@ void story_init(int chapter, int story) {
 // 戻り値: ストーリー再生中の場合は 0
 // 　　　  再生を終えた場合は 1 を返す
 int story_update() {
+	s3d::Audio bgm[2] = {
+		AudioAsset(U"bgm_story1"),
+		AudioAsset(U"bgm_story2")
+	};
+
+	// BGM再生
+	if (scene == 0) {
+		if (!bgm[dialogue[scene].bgm].isPlaying()) {
+			bgm[dialogue[scene].bgm].setLoop(true);
+			bgm[dialogue[scene].bgm].play();
+		}
+	}
+
+	// BGM変更
+	else if (dialogue[scene].bgm != dialogue[scene - 1].bgm) {
+		if (!bgm[dialogue[scene].bgm].isPlaying()) {
+			bgm[dialogue[scene - 1].bgm].stop();
+			bgm[dialogue[scene].bgm].setLoop(true);
+			bgm[dialogue[scene].bgm].play();
+		}
+	}
+
+	// クリックで会話を進める
 	if (MouseL.down()) {
 		AudioAsset(U"se_select").playOneShot();
 
+		// 次の会話へ移る
 		if (playing == 1) {
-			if (scene == dialogue.size() - 1)
+
+			// 最後のセリフに到達した場合は、終了する
+			if (scene == dialogue.size() - 1) {
+				bgm[dialogue[scene].bgm].stop();
 				return 1;
+			}
 
 			scene++;
 			start = Scene::Time() * 1000;
 			playing = 0;
 			length = (int)((Scene::Time() * 1000 - start) / 50);
 		}
+
+		// 会話が表示途中の場合、全部表示させる
 		else {
 			length = dialogue[scene].text.length();
 		}
 	}
 
+	// 会話が表示途中かどうか判定
 	if (length >= dialogue[scene].text.length()) {
 		playing = 1;
 	}
 
+	// 会話の表示制御
 	if (playing == 0) {
 		length = (int)((Scene::Time() * 1000 - start) / 50);
 	}
@@ -96,10 +133,25 @@ void story_draw() {
 		U"メルヴィ"
 	};
 
-	if (dialogue[scene].left >= 0)
-		TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
-	if (dialogue[scene].right >= 0)
-		TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+	if (dialogue[scene].left >= 0) {
+		if (dialogue[scene].speaker != 1) {
+			const ScopedColorMul2D state(ColorF(0.6, 0.6, 0.6));
+			TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+		else {
+			TextureAsset(name[dialogue[scene].left]).scaled(1.5).drawAt(Scene::Width() / 16 + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+	}
+
+	if (dialogue[scene].right >= 0) {
+		if (dialogue[scene].speaker != 2) {
+			const ScopedColorMul2D state(ColorF(0.6, 0.6, 0.6));
+			TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+		else {
+			TextureAsset(name[dialogue[scene].right]).scaled(1.5).drawAt(Scene::Width() / 16 * 15 - chara_size + chara_size / 2, (Scene::Height() / 16) * 12 - chara_size - namebox_size - 10 + chara_size / 2);
+		}
+	}
 
 	if (dialogue[scene].speaker != 0) {
 		Rect namebox = Rect(Scene::Width() / 16, (Scene::Height() / 16) * 12 - namebox_size, 150, namebox_size).draw(Palette::White).drawFrame(1, 0, Palette::Black);
