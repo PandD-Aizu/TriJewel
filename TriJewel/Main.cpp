@@ -271,7 +271,7 @@ public:
             break;
         }
 
-        FontAsset(U"TitleFont")(U"ステージセレクト").drawAt(400, 100);
+        FontAsset(U"TitleFont")(U"ステージセレクト").draw(180, 100, Palette::Gray);
     }
 };
 
@@ -376,9 +376,9 @@ public:
         chapter = chapter_before;
         story = 0;
 
-        chap_str[0] = U"物語1";
-        chap_str[1] = U"物語2";
-        chap_str[2] = U"物語3";
+        chap_str[0] = U"シロナのねがい";
+        chap_str[1] = U"リンドルのねがい";
+        chap_str[2] = U"チャマのねがい";
 
         story_flag = 0;
     }
@@ -397,7 +397,7 @@ public:
             }
 
             // プロローグ
-            if (SimpleGUI::Button(U"はじまり", Vec2(50, Scene::Height() / 4 + 50), 150))
+            if (SimpleGUI::Button(U"はじまり", Vec2(100, Scene::Height() / 4 + 50), 150))
             {
                 AudioAsset(U"se_click").playOneShot();
 
@@ -410,7 +410,7 @@ public:
 
             // どれかの物語が選択されたら、話数選択画面へ移動する
             for (int i = 0; i < CHAPTER_NUM; i++) {
-                if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
+                if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 180))
                 {
                     AudioAsset(U"se_click").playOneShot();
 
@@ -456,6 +456,7 @@ public:
     {
         //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
         TextureAsset(U"story").draw(0, 0);
+        Rect(0, 0, Scene::Width(), Scene::Height()).draw(ColorF(0.8, 0.8, 0.8, 0.3));
 
         switch (mode) {
             // 章選択
@@ -467,7 +468,7 @@ public:
 
             // 各章ボタン
             for (int i = 0; i < CHAPTER_NUM; i++) {
-                SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150);
+                SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 180);
             }
             break;
 
@@ -529,12 +530,13 @@ public:
     {
         //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
         TextureAsset(U"story").draw(0, 0);
+        Rect(0, 0, Scene::Width(), Scene::Height()).draw(ColorF(0.8, 0.8, 0.8, 0.3));
 
         story_draw();
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
-        FontAsset(U"TitleFont")(U"ストーリー再生中...").drawAt(400, 100);
+        //FontAsset(U"TitleFont")(U"ストーリー再生中...").drawAt(400, 100);
     }
 };
 
@@ -608,7 +610,7 @@ void Main()
     TextureAsset::Register(U"チャマ", U"Data/Image/story/chama.png");
     TextureAsset::Register(U"ファイ", U"Data/Image/story/phi.png");
     TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
-    TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
+    TextureAsset::Register(U"メルビィ", U"Data/Image/story/meruby.png");
     TextureAsset::Register(U"next", U"Data/Image/story/next.png");
 
     // 効果音
