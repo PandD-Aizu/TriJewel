@@ -26,6 +26,8 @@ int stage_before = 0;   // 直前に選ばれていたステージ
 int story_flag = 0; // ストーリー再生フラグ
 int chapter_before = 0; // 直前に選ばれていた章
 
+String caption[CHAPTER_NUM][STORY_NUM];
+
 // クリアしたステージの合計(難易度別)
 void updateSave() {
     for (int i = 0; i < DIFF_NUM; i++) {
@@ -33,6 +35,23 @@ void updateSave() {
         for (int j = 0; j < STAGE_NUM; j++) {
             save.total[i] += save.data[i][j];
         }
+    }
+}
+
+// 物語データ読み込み
+void readCaption() {
+    TextReader reader;
+
+    for (int i = 0; i < CHAPTER_NUM; i++) {
+        if (!reader.open(U"Data/Story/{}/caption.txt"_fmt(i + 1))) {
+            throw Error(U"Failed to open caption.txt");
+        }
+
+        for (int j = 0; j < STORY_NUM; j++) {
+            reader.readLine(caption[i][j]);
+        }
+
+        reader.close();
     }
 }
 
@@ -435,7 +454,7 @@ public:
             for (int i = 0; i < STORY_NUM; i++) {
                 bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
 
-                if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)), unspecified, cond))
+                if (SimpleGUI::Button(caption[chapter - 1][i], Vec2(250, 150 + 40 * i), 300, cond))
                 {
                     AudioAsset(U"se_click").playOneShot();
 
@@ -479,7 +498,7 @@ public:
             // 話数
             for (int i = 0; i < STORY_NUM; i++) {
                 bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
-                SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)), unspecified, cond);
+                SimpleGUI::Button(caption[chapter - 1][i], Vec2(250, 150 + 40 * i), 300, cond);
             }
             break;
 
@@ -640,6 +659,7 @@ void Main()
     manager.add<HowToPlay>(U"HowToPlay");
 
     readSave();
+    readCaption();
 	while (System::Update())
 	{
         // 現在のシーンを実行
