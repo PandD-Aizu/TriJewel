@@ -1,0 +1,61 @@
+スタッフクレジット
+
+<プログラム>
+KENnY
+id
+たいっちゃん
+
+<グラフィック>
+KENnY
+
+<グラフィック監修>
+KENnYの妹
+
+<サウンド>
+KENnY
+
+<ステージ>
+KENnY
+たいっちゃん
+
+<ストーリー>
+KENnY
+
+<キャラクターデザイン>
+KENnY
+KENnYの妹
+
+<エンディングテーマ>
+「みんなともだち」
+作詞: KENnY
+作曲: KENnY
+編曲: KENnY
+歌: AIきりたん
+
+<使ったツール>
+Visual Studio 2019
+(https://visualstudio.microsoft.com/ja/vs/)
+Siv3d
+(https://siv3d.github.io/)
+
+FireAlpaca
+(https://firealpaca.com/ja/)
+
+Domino
+(https://takabosoft.com/domino)
+Studio One
+(https://www.presonus.com/products/Studio-One)
+MuseScore
+(https://musescore.org/ja)
+NEUTRINO
+(https://n3utrino.work/)
+
+<制作>
+会津大学 企画開発部
+
+<スペシャルサンクス>
+このゲームを
+プレイしてくれた皆様
+
+あそんでくれて
+ありがとう！
