@@ -283,6 +283,9 @@ public:
             for (int i = 0; i < STAGE_NUM; i++) {
                 bool cond = (save.total[diff_before - 1] > i - init_stage);
                 SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage)), unspecified, cond);
+                if (save.data[diff_before - 1][i] == 1) {
+                    Rect(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage), 65, 35).draw(ColorF(1,1,0,0.5));
+                }
             }
             break;
 
@@ -741,7 +744,7 @@ void Main()
     AudioAsset::Register(U"bgm_clear", U"Data/Sound/bgm/clear.ogg");
     AudioAsset::Register(U"bgm_story1", U"Data/Sound/bgm/story.ogg");
     AudioAsset::Register(U"bgm_story2", U"Data/Sound/bgm/story2.ogg");
-    AudioAsset::Register(U"bgm_ed", U"Data/Sound/bgm/ed_theme.wav");
+    AudioAsset::Register(U"bgm_ed", U"Data/Sound/bgm/ed_theme.ogg");
 
 	// シーンマネージャーを作成
 	App manager;
