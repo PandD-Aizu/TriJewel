@@ -365,6 +365,12 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
+        String chapter[CHAPTER_NUM] = {
+            U"シロナのねがい",
+            U"リンドルのねがい",
+            U"チャマのねがい"
+        };
+
         Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
         
         puzzle_draw();
@@ -372,7 +378,19 @@ public:
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
         if (puzzle_state != 0) {
+            FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center().x + 4, Scene::Center().y + 4, Palette::Gray);
             FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center());
+
+            if (save.data[diff_before - 1][stage_before - 1] == 0 && (save.total[diff_before - 1] + 1) % 3 == 0) {
+                FontAsset(U"StoryFont")(U"おはなしがふえたよ！").drawAt(Scene::Center().x + 4, Scene::Center().y + 52, Palette::Gray);
+                FontAsset(U"StoryFont")(U"おはなしがふえたよ！").drawAt(Scene::Center().x, Scene::Center().y + 50);
+
+                String story = U"　"+chapter[diff_before - 1] + U"「" + caption[diff_before - 1][(save.total[diff_before - 1] + 1) / 3 - 1] + U"」　";
+
+                FontAsset(U"StoryFont")(story).drawAt(Scene::Center().x, Scene::Center().y + 90).draw(Palette::White).drawFrame(1, Palette::Black);
+
+                FontAsset(U"StoryFont")(story).drawAt(Scene::Center().x, Scene::Center().y + 90, Palette::Green);
+            }
         }
 
         //FontAsset(U"TitleFont")(U"パズル").drawAt(400, 100);
@@ -721,6 +739,7 @@ void Main()
     TextureAsset::Register(U"place", U"Data/Image/game/place.png");
     TextureAsset::Register(U"door", U"Data/Image/game/door.png");
     TextureAsset::Register(U"button", U"Data/Image/game/button.png");
+    TextureAsset::Register(U"match", U"Data/Image/game/match.png");
 
     TextureAsset::Register(U"シロナ", U"Data/Image/story/sirona.png");
     TextureAsset::Register(U"リンドル", U"Data/Image/story/rindol.png");
@@ -735,6 +754,7 @@ void Main()
     AudioAsset::Register(U"se_cancel", U"Data/Sound/se/cancel.ogg");
     AudioAsset::Register(U"se_step", U"Data/Sound/se/step.ogg");
     AudioAsset::Register(U"se_select", U"Data/Sound/se/select.ogg");
+    AudioAsset::Register(U"se_unlock", U"Data/Sound/se/unlock.ogg");
 
     // BGM
     AudioAsset::Register(U"bgm_title", U"Data/Sound/bgm/title.ogg");

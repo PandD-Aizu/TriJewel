@@ -8,6 +8,8 @@ static Grid<int> base_data;		//岩や箱を除いたステージ情報
 static Player player;	// プレイヤー
 static Array<Player> player_log;	// プレイヤーの移動ログ
 
+static int door_flag;	// 扉解錠フラグ
+
 // 操作ボタン
 Rect up(600, 300, 100, 100);
 Rect right(700, 400, 100, 100);
@@ -108,6 +110,8 @@ void puzzle_init(int diff, int stage) {
 
 	stage_data_log.clear();
 	stage_data_log << stage_data;
+
+	door_flag = 0;
 }
 
 // パズルの更新関数
@@ -183,6 +187,11 @@ int puzzle_update() {
 
 	//扉を開ける
 	if (checkdoor()) {
+		if (door_flag == 0) {
+			door_flag = 1;
+			AudioAsset(U"se_unlock").playOneShot();
+		}
+
 		for (int i = 0; i < stage_data.height(); i++) {
 			for (int j = 0; j < stage_data.width(); j++) {
 				if (stage_data[i][j] == DOOR) {
@@ -194,6 +203,10 @@ int puzzle_update() {
 
 	// 条件を満たしていない時、扉を閉める
 	else {
+		if (door_flag == 1) {
+			door_flag = 0;
+		}
+
 		for (int i = 0; i < stage_data.height(); i++) {
 			for (int j = 0; j < stage_data.width(); j++) {
 				if (stage_data[i][j] == ROAD && base_data[i][j] == DOOR) {
@@ -274,6 +287,9 @@ void puzzle_draw() {
 				case BOX:
 					//Rect(100 + j * 30, 100 + i * 30, 30, 30).draw(Palette::Black);
 					TextureAsset(U"box").draw(100 + j * 30, 100 + i * 30);
+					if (stage_data_init[i][j] == PLACE) {
+						TextureAsset(U"match").draw(100 + j * 30, 100 + i * 30);
+					}
 					break;
 
 				case PLACE:
@@ -436,6 +452,10 @@ void objmove(char t, int n) {
 // 扉が開くかの判定
 bool checkdoor(){
 	int n = 0;
+
+	if (BoxNum == 0) {
+		return false;
+	}
 
 	for (int i = 0; i < stage_data.height(); i++) {
 		for (int j = 0; j < stage_data.width(); j++) {
