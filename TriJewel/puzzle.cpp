@@ -229,6 +229,10 @@ int puzzle_update() {
 		player_log.clear();
 		player_log << player;
 
+		stage_data = stage_data_log[0];
+		stage_data_log.clear();
+		stage_data_log << stage_data;
+
 		for (int i = 0; i < stage_data.height(); i++) {
 			for (int j = 0; j < stage_data.width(); j++) {
 				stage_data[i][j] = stage_data_init[i][j];
