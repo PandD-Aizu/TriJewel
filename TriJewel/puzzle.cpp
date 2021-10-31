@@ -334,6 +334,9 @@ void puzzle_draw() {
 	}
 
 	SimpleGUI::Button(U"やりなおし", Vec2(120, 10));
+
+	FontAsset(U"StoryFont")(U"みぎクリック: いっかい もどる").draw(50, 500);
+	FontAsset(U"StoryFont")(U"ひだりクリックで\nそうさしてね！").draw(up.x - 100, up.y - 100);
 }
 
 
