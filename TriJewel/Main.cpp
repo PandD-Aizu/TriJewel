@@ -8,7 +8,7 @@ using App = SceneManager<String>;
 #define DIFF_NUM 3  // 難易度数
 #define STAGE_NUM 30    // ステージ数
 
-#define CHAPTER_NUM 3   // 章の数
+#define CHAPTER_NUM 4   // 章の数
 #define STORY_NUM 10    // 物語の数
 
 // セーブデータ
@@ -420,6 +420,7 @@ public:
         chap_str[0] = U"シロナのねがい";
         chap_str[1] = U"リンドルのねがい";
         chap_str[2] = U"チャマのねがい";
+        chap_str[3] = U"おまけ";
 
         story_flag = 0;
     }
@@ -450,7 +451,7 @@ public:
             }
 
             // どれかの物語が選択されたら、話数選択画面へ移動する
-            for (int i = 0; i < CHAPTER_NUM; i++) {
+            for (int i = 0; i < CHAPTER_NUM - 1; i++) {
                 if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 180))
                 {
                     AudioAsset(U"se_click").playOneShot();
@@ -462,13 +463,23 @@ public:
             }
 
             // スタッフクレジット
-            if (SimpleGUI::Button(U"スタッフクレジット", Vec2(500, Scene::Height() / 4 * 3))) {
-                AudioAsset(U"se_click").playOneShot();
+            if (save.total[0] + save.total[1] + save.total[2] == STAGE_NUM * DIFF_NUM) {
+                if (SimpleGUI::Button(U"おまけ", Vec2(500, Scene::Height() / 4 * 3 - 50))) {
+                    AudioAsset(U"se_click").playOneShot();
 
-                chapter = 0;
-                chapter_before = chapter;
-                story = 0;
-                changeScene(U"Staff");
+                    mode = 1;
+                    chapter = CHAPTER_NUM;
+                    chapter_before = chapter;
+                }
+
+                if (SimpleGUI::Button(U"スタッフクレジット", Vec2(500, Scene::Height() / 4 * 3))) {
+                    AudioAsset(U"se_click").playOneShot();
+
+                    chapter = 0;
+                    chapter_before = chapter;
+                    story = 0;
+                    changeScene(U"Staff");
+                }
             }
 
             break;
@@ -484,7 +495,7 @@ public:
 
             // ストーリー再生画面へ移動する
             for (int i = 0; i < STORY_NUM; i++) {
-                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
+                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1) || chapter_before == CHAPTER_NUM;
 
                 if (SimpleGUI::Button(caption[chapter - 1][i], Vec2(250, 150 + 40 * i), 300, cond))
                 {
@@ -518,11 +529,14 @@ public:
             SimpleGUI::Button(U"はじまり", Vec2(100, Scene::Height() / 4 + 50), 150);
 
             // 各章ボタン
-            for (int i = 0; i < CHAPTER_NUM; i++) {
+            for (int i = 0; i < CHAPTER_NUM - 1; i++) {
                 SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 180);
             }
 
-            SimpleGUI::Button(U"スタッフクレジット", Vec2(500, Scene::Height() / 4 * 3));
+            if (save.total[0] + save.total[1] + save.total[2] == STAGE_NUM * DIFF_NUM) {
+                SimpleGUI::Button(U"おまけ", Vec2(500, Scene::Height() / 4 * 3 - 50));
+                SimpleGUI::Button(U"スタッフクレジット", Vec2(500, Scene::Height() / 4 * 3));
+            }
 
             break;
 
@@ -532,7 +546,7 @@ public:
             SimpleGUI::Button(U"もどる", Vec2(10, 10));
             // 話数
             for (int i = 0; i < STORY_NUM; i++) {
-                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
+                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1) || chapter_before == CHAPTER_NUM;
                 SimpleGUI::Button(caption[chapter - 1][i], Vec2(250, 150 + 40 * i), 300, cond);
             }
             break;
