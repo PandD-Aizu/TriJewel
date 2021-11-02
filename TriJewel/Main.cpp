@@ -8,7 +8,7 @@ using App = SceneManager<String>;
 #define DIFF_NUM 3  // 難易度数
 #define STAGE_NUM 30    // ステージ数
 
-#define CHAPTER_NUM 3   // 章の数
+#define CHAPTER_NUM 4   // 章の数
 #define STORY_NUM 10    // 物語の数
 
 // セーブデータ
@@ -26,6 +26,8 @@ int stage_before = 0;   // 直前に選ばれていたステージ
 int story_flag = 0; // ストーリー再生フラグ
 int chapter_before = 0; // 直前に選ばれていた章
 
+String caption[CHAPTER_NUM][STORY_NUM];
+
 // クリアしたステージの合計(難易度別)
 void updateSave() {
     for (int i = 0; i < DIFF_NUM; i++) {
@@ -33,6 +35,23 @@ void updateSave() {
         for (int j = 0; j < STAGE_NUM; j++) {
             save.total[i] += save.data[i][j];
         }
+    }
+}
+
+// 物語データ読み込み
+void readCaption() {
+    TextReader reader;
+
+    for (int i = 0; i < CHAPTER_NUM; i++) {
+        if (!reader.open(U"Data/Story/{}/caption.txt"_fmt(i + 1))) {
+            throw Error(U"Failed to open caption.txt");
+        }
+
+        for (int j = 0; j < STORY_NUM; j++) {
+            reader.readLine(caption[i][j]);
+        }
+
+        reader.close();
     }
 }
 
@@ -264,6 +283,9 @@ public:
             for (int i = 0; i < STAGE_NUM; i++) {
                 bool cond = (save.total[diff_before - 1] > i - init_stage);
                 SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage)), unspecified, cond);
+                if (save.data[diff_before - 1][i] == 1) {
+                    Rect(100 + 100 * (i % init_stage), 200 + 50 * (i / init_stage), 65, 35).draw(ColorF(1,1,0,0.5));
+                }
             }
             break;
 
@@ -271,7 +293,8 @@ public:
             break;
         }
 
-        FontAsset(U"TitleFont")(U"ステージセレクト").drawAt(400, 100);
+        FontAsset(U"TitleFont")(U"ステージセレクト").draw(184, 104, Palette::Gray);
+        FontAsset(U"TitleFont")(U"ステージセレクト").draw(180, 100, Palette::Lightgreen);
     }
 };
 
@@ -342,6 +365,12 @@ public:
     // 描画関数 (const 修飾)
     void draw() const override
     {
+        String chapter[CHAPTER_NUM] = {
+            U"シロナのねがい",
+            U"リンドルのねがい",
+            U"チャマのねがい"
+        };
+
         Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
         
         puzzle_draw();
@@ -349,7 +378,19 @@ public:
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
         if (puzzle_state != 0) {
+            FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center().x + 4, Scene::Center().y + 4, Palette::Gray);
             FontAsset(U"TitleFont")(U"クリア！").drawAt(Scene::Center());
+
+            if (save.data[diff_before - 1][stage_before - 1] == 0 && (save.total[diff_before - 1] + 1) % 3 == 0) {
+                FontAsset(U"StoryFont")(U"おはなしがふえたよ！").drawAt(Scene::Center().x + 4, Scene::Center().y + 52, Palette::Gray);
+                FontAsset(U"StoryFont")(U"おはなしがふえたよ！").drawAt(Scene::Center().x, Scene::Center().y + 50);
+
+                String story = U"　"+chapter[diff_before - 1] + U"「" + caption[diff_before - 1][(save.total[diff_before - 1] + 1) / 3 - 1] + U"」　";
+
+                FontAsset(U"StoryFont")(story).drawAt(Scene::Center().x, Scene::Center().y + 90).draw(Palette::White).drawFrame(1, Palette::Black);
+
+                FontAsset(U"StoryFont")(story).drawAt(Scene::Center().x, Scene::Center().y + 90, Palette::Green);
+            }
         }
 
         //FontAsset(U"TitleFont")(U"パズル").drawAt(400, 100);
@@ -376,9 +417,10 @@ public:
         chapter = chapter_before;
         story = 0;
 
-        chap_str[0] = U"物語1";
-        chap_str[1] = U"物語2";
-        chap_str[2] = U"物語3";
+        chap_str[0] = U"シロナのねがい";
+        chap_str[1] = U"リンドルのねがい";
+        chap_str[2] = U"チャマのねがい";
+        chap_str[3] = U"おまけ";
 
         story_flag = 0;
     }
@@ -397,7 +439,7 @@ public:
             }
 
             // プロローグ
-            if (SimpleGUI::Button(U"はじまり", Vec2(50, Scene::Height() / 4 + 50), 150))
+            if (SimpleGUI::Button(U"はじまり", Vec2(100, Scene::Height() / 4 + 50), 150))
             {
                 AudioAsset(U"se_click").playOneShot();
 
@@ -409,14 +451,34 @@ public:
             }
 
             // どれかの物語が選択されたら、話数選択画面へ移動する
-            for (int i = 0; i < CHAPTER_NUM; i++) {
-                if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150))
+            for (int i = 0; i < CHAPTER_NUM - 1; i++) {
+                if (SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 180))
                 {
                     AudioAsset(U"se_click").playOneShot();
 
                     mode = 1;
                     chapter = i + 1;
                     chapter_before = chapter;
+                }
+            }
+
+            // スタッフクレジット
+            if (save.total[0] + save.total[1] + save.total[2] == STAGE_NUM * DIFF_NUM) {
+                if (SimpleGUI::Button(U"おまけ", Vec2(500, Scene::Height() / 4 * 3 - 50))) {
+                    AudioAsset(U"se_click").playOneShot();
+
+                    mode = 1;
+                    chapter = CHAPTER_NUM;
+                    chapter_before = chapter;
+                }
+
+                if (SimpleGUI::Button(U"スタッフクレジット", Vec2(500, Scene::Height() / 4 * 3))) {
+                    AudioAsset(U"se_click").playOneShot();
+
+                    chapter = 0;
+                    chapter_before = chapter;
+                    story = 0;
+                    changeScene(U"Staff");
                 }
             }
 
@@ -433,9 +495,9 @@ public:
 
             // ストーリー再生画面へ移動する
             for (int i = 0; i < STORY_NUM; i++) {
-                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
+                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1) || chapter_before == CHAPTER_NUM;
 
-                if (SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)), unspecified, cond))
+                if (SimpleGUI::Button(caption[chapter - 1][i], Vec2(250, 150 + 40 * i), 300, cond))
                 {
                     AudioAsset(U"se_click").playOneShot();
 
@@ -456,6 +518,7 @@ public:
     {
         //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
         TextureAsset(U"story").draw(0, 0);
+        Rect(0, 0, Scene::Width(), Scene::Height()).draw(ColorF(0.8, 0.8, 0.8, 0.3));
 
         switch (mode) {
             // 章選択
@@ -466,9 +529,15 @@ public:
             SimpleGUI::Button(U"はじまり", Vec2(100, Scene::Height() / 4 + 50), 150);
 
             // 各章ボタン
-            for (int i = 0; i < CHAPTER_NUM; i++) {
-                SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 150);
+            for (int i = 0; i < CHAPTER_NUM - 1; i++) {
+                SimpleGUI::Button(chap_str[i], Vec2(100 + 200 * i, Scene::Height() / 2 - 25), 180);
             }
+
+            if (save.total[0] + save.total[1] + save.total[2] == STAGE_NUM * DIFF_NUM) {
+                SimpleGUI::Button(U"おまけ", Vec2(500, Scene::Height() / 4 * 3 - 50));
+                SimpleGUI::Button(U"スタッフクレジット", Vec2(500, Scene::Height() / 4 * 3));
+            }
+
             break;
 
             // 話数選択
@@ -477,8 +546,8 @@ public:
             SimpleGUI::Button(U"もどる", Vec2(10, 10));
             // 話数
             for (int i = 0; i < STORY_NUM; i++) {
-                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1);
-                SimpleGUI::Button(U"{:0>2}"_fmt(i + 1), Vec2(100 + 75 * (i % 5), 200 + 100 * (i / 5)), unspecified, cond);
+                bool cond = save.total[chapter_before - 1] / (STAGE_NUM / STORY_NUM) >= (i + 1) || chapter_before == CHAPTER_NUM;
+                SimpleGUI::Button(caption[chapter - 1][i], Vec2(250, 150 + 40 * i), 300, cond);
             }
             break;
 
@@ -486,7 +555,8 @@ public:
             break;
         }
 
-        FontAsset(U"TitleFont")(U"ストーリーセレクト").drawAt(400, 100);
+        FontAsset(U"TitleFont")(U"ストーリーセレクト").drawAt(404, 104, Palette::Gray);
+        FontAsset(U"TitleFont")(U"ストーリーセレクト").drawAt(400, 100, Palette::White);
     }
 };
 
@@ -529,12 +599,13 @@ public:
     {
         //Scene::SetBackground(ColorF(0.3, 0.4, 0.5));
         TextureAsset(U"story").draw(0, 0);
+        Rect(0, 0, Scene::Width(), Scene::Height()).draw(ColorF(0.8, 0.8, 0.8, 0.3));
 
         story_draw();
 
         SimpleGUI::Button(U"もどる", Vec2(10, 10));
 
-        FontAsset(U"TitleFont")(U"ストーリー再生中...").drawAt(400, 100);
+        //FontAsset(U"TitleFont")(U"ストーリー再生中...").drawAt(400, 100);
     }
 };
 
@@ -572,7 +643,87 @@ public:
 
         SimpleGUI::Button(U"タイトル", Vec2(10, 10));
 
+        FontAsset(U"TitleFont")(U"あそびかた").drawAt(404, 104, Palette::Gray);
         FontAsset(U"TitleFont")(U"あそびかた").drawAt(400, 100);
+    }
+};
+
+// スタッフクレジットシーン
+class Staff : public App::Scene
+{
+private:
+    Array<String> credit;   // スタッフクレジット(一行ずつ格納する)
+    int scroll;   // スクロール位置(y座標)
+
+public:
+
+    // コンストラクタ（必ず実装）
+    Staff(const InitData& init)
+        : IScene(init)
+    {
+        scroll = Scene::Height() / 2 + 200;
+
+        TextReader reader;
+        String line;
+
+        if (!reader.open(U"Data/staff.txt")) {
+            throw Error(U"Failed to open staff.txt");
+        }
+
+        // スタッフクレジット情報の読み込み
+        while (reader.readLine(line)) {
+            // 空行は大きなスペース
+            if (line.isEmpty()) {
+                for (int i = 0; i < 3; i++) {
+                    credit << U"";
+                }
+            }
+
+            // 一行ずつ読み込む
+            else {
+                credit << line;
+            }
+        }
+
+        reader.close();
+
+        AudioAsset(U"bgm_ed").play();
+    }
+
+    // 更新関数
+    void update() override
+    {
+        scroll -= 1;
+
+        // ストーリー選択画面へ戻る
+        if (MouseR.down() || !AudioAsset(U"bgm_ed").isPlaying())
+        {
+            AudioAsset(U"bgm_ed").stop();
+            changeScene(U"StorySelect");
+        }
+    }
+
+    // 描画関数 (const 修飾)
+    void draw() const override
+    {
+        String fontName;
+        Color color;
+
+        TextureAsset(U"logo").drawAt(Scene::Width() / 2, scroll - 200);
+
+        for (int i = 0; i < credit.size(); i++) {
+            if (credit[i][0] == '(')
+                fontName = U"StoryFont";
+            else
+                fontName = U"TitleFont";
+
+            if (credit[i][0] == '<')
+                color = Palette::Lightgreen;
+            else
+                color = Palette::White;
+
+            FontAsset(fontName)(credit[i]).drawAt(Scene::Width() / 2, scroll + 60 * i, color);
+        }
     }
 };
 
@@ -602,13 +753,14 @@ void Main()
     TextureAsset::Register(U"place", U"Data/Image/game/place.png");
     TextureAsset::Register(U"door", U"Data/Image/game/door.png");
     TextureAsset::Register(U"button", U"Data/Image/game/button.png");
+    TextureAsset::Register(U"match", U"Data/Image/game/match.png");
 
     TextureAsset::Register(U"シロナ", U"Data/Image/story/sirona.png");
     TextureAsset::Register(U"リンドル", U"Data/Image/story/rindol.png");
     TextureAsset::Register(U"チャマ", U"Data/Image/story/chama.png");
     TextureAsset::Register(U"ファイ", U"Data/Image/story/phi.png");
     TextureAsset::Register(U"エメ", U"Data/Image/story/eme.png");
-    TextureAsset::Register(U"メルヴィ", U"Data/Image/story/meruby.png");
+    TextureAsset::Register(U"メルビィ", U"Data/Image/story/meruby.png");
     TextureAsset::Register(U"next", U"Data/Image/story/next.png");
 
     // 効果音
@@ -616,6 +768,7 @@ void Main()
     AudioAsset::Register(U"se_cancel", U"Data/Sound/se/cancel.ogg");
     AudioAsset::Register(U"se_step", U"Data/Sound/se/step.ogg");
     AudioAsset::Register(U"se_select", U"Data/Sound/se/select.ogg");
+    AudioAsset::Register(U"se_unlock", U"Data/Sound/se/unlock.ogg");
 
     // BGM
     AudioAsset::Register(U"bgm_title", U"Data/Sound/bgm/title.ogg");
@@ -625,6 +778,7 @@ void Main()
     AudioAsset::Register(U"bgm_clear", U"Data/Sound/bgm/clear.ogg");
     AudioAsset::Register(U"bgm_story1", U"Data/Sound/bgm/story.ogg");
     AudioAsset::Register(U"bgm_story2", U"Data/Sound/bgm/story2.ogg");
+    AudioAsset::Register(U"bgm_ed", U"Data/Sound/bgm/ed_theme.ogg");
 
 	// シーンマネージャーを作成
 	App manager;
@@ -636,8 +790,10 @@ void Main()
     manager.add<StorySelect>(U"StorySelect");
     manager.add<Story>(U"Story");
     manager.add<HowToPlay>(U"HowToPlay");
+    manager.add<Staff>(U"Staff");
 
     readSave();
+    readCaption();
 	while (System::Update())
 	{
         // 現在のシーンを実行
