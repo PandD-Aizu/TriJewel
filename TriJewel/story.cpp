@@ -130,7 +130,7 @@ void story_draw() {
 		U"チャマ",
 		U"ファイ",
 		U"エメ",
-		U"メルヴィ"
+		U"メルビィ"
 	};
 
 	if (dialogue[scene].left >= 0) {
